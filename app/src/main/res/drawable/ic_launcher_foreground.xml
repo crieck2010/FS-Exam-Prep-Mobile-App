@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Surveyor Total Station / Theodolite on Tripod -->
+    <!-- Telescope and Optic Barrel -->
+    <path
+        android:fillColor="#38BDF8"
+        android:pathData="M38,36 h32 v8 h-32 z" />
+    <path
+        android:fillColor="#60A5FA"
+        android:pathData="M68,34 h6 v12 h-6 z" />
+    <path
+        android:fillColor="#0284C7"
+        android:pathData="M34,35 h4 v10 h-4 z" />
+    <!-- Center Pivot / Standards -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M48,44 h12 v12 h-12 z" />
+    <!-- Horizontal Plate / Tribrach Base -->
+    <path
+        android:fillColor="#F1F5F9"
+        android:pathData="M44,56 h20 v5 h-20 z" />
+    <!-- Tripod Head -->
+    <path
+        android:fillColor="#E2E8F0"
+        android:pathData="M47,61 h14 v3 h-14 z" />
+    <!-- Tripod Legs (Center, Left, Right) -->
+    <!-- Center leg -->
+    <path
+        android:fillColor="#38BDF8"
+        android:pathData="M52.5,64 h3 v22 h-3 z" />
+    <!-- Left leg -->
+    <path
+        android:fillColor="#38BDF8"
+        android:pathData="M48,64 L34,84 L36.5,85.5 L50.5,65.5 Z" />
+    <!-- Right leg -->
+    <path
+        android:fillColor="#38BDF8"
+        android:pathData="M60,64 L74,84 L71.5,85.5 L57.5,65.5 Z" />
+    <!-- Crosshairs Reticle ring around instrument -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.5"
+        android:fillColor="#00000000"
+        android:pathData="M54,26 A14,14 0 1,0 54,54 A14,14 0 1,0 54,26" />
+    <!-- North arrow / plumb indicator -->
+    <path
+        android:fillColor="#F43F5E"
+        android:pathData="M54,21 L51,26 L57,26 Z" />
+</vector>
