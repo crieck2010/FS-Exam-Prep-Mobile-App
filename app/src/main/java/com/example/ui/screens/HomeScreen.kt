@@ -23,14 +23,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Architecture
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Brightness4
+import androidx.compose.material.icons.filled.Brightness7
+import androidx.compose.material.icons.filled.BrightnessAuto
 import androidx.compose.material.icons.filled.Calculate
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Construction
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.GridOn
 import androidx.compose.material.icons.filled.Leaderboard
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.PlayArrow
@@ -40,16 +46,21 @@ import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Style
 import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,6 +77,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.model.Achievement
+import com.example.model.AppThemeMode
 import com.example.model.CompletedModule
 import com.example.model.DomainStat
 import com.example.model.FsDomain
@@ -75,15 +87,9 @@ import com.example.ui.theme.AccentAmber
 import com.example.ui.theme.AccentCyan
 import com.example.ui.theme.CorrectBadgeBg
 import com.example.ui.theme.CorrectBadgeText
-import com.example.ui.theme.DarkBorder
-import com.example.ui.theme.DarkSurface
-import com.example.ui.theme.DarkSurfaceHighlight
-import com.example.ui.theme.DarkSurfaceVariant
 import com.example.ui.theme.IncorrectBadgeBg
 import com.example.ui.theme.IncorrectBadgeText
 import com.example.ui.theme.PrimaryBlue
-import com.example.ui.theme.TextPrimaryDark
-import com.example.ui.theme.TextSecondaryDark
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -96,6 +102,8 @@ fun HomeScreen(
     domainStats: Map<FsDomain, DomainStat>,
     achievements: List<Achievement>,
     leaderboard: List<LeaderboardUser>,
+    currentThemeMode: AppThemeMode = AppThemeMode.SYSTEM,
+    onSelectThemeMode: (AppThemeMode) -> Unit = {},
     onStartDomainQuiz: (FsDomain) -> Unit,
     onStartAdaptiveQuiz: () -> Unit,
     onStartMockExam: () -> Unit,
@@ -107,6 +115,7 @@ fun HomeScreen(
     onOpenLeaderboard: () -> Unit
 ) {
     var domainFilter by remember { mutableStateOf("All") }
+    var showThemeDialog by remember { mutableStateOf(false) }
 
     val unlockedBadges = remember(achievements) { achievements.count { it.isUnlocked } }
     val myLeaderboardEntry = remember(leaderboard) { leaderboard.find { it.isCurrentUser } }
@@ -151,49 +160,74 @@ fun HomeScreen(
         ) {
             item {
                 Spacer(modifier = Modifier.height(10.dp))
-                // Top Header Row with Streak Tracker
+                // Top Header Row with Theme Selector & Streak Tracker
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = "NCEES FS Exam Prep",
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
-                            color = TextPrimaryDark
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
                             text = "Fundamentals of Surveying",
                             fontSize = 13.sp,
-                            color = TextSecondaryDark
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
 
-                    // Streak Tracker Pill
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(Color(0xFF2E1C0C))
-                            .border(1.dp, Color(0xFFF97316), RoundedCornerShape(20.dp))
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                            .testTag("streak_tracker_pill")
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        // Theme Toggle Button
+                        IconButton(
+                            onClick = { showThemeDialog = true },
+                            modifier = Modifier
+                                .size(38.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                                .testTag("theme_selector_btn")
+                        ) {
                             Icon(
-                                imageVector = Icons.Default.LocalFireDepartment,
-                                contentDescription = "Streak",
-                                tint = AccentAmber,
-                                modifier = Modifier.size(18.dp)
+                                imageVector = when (currentThemeMode) {
+                                    AppThemeMode.SYSTEM -> Icons.Default.BrightnessAuto
+                                    AppThemeMode.LIGHT -> Icons.Default.LightMode
+                                    AppThemeMode.DARK -> Icons.Default.DarkMode
+                                },
+                                contentDescription = "Change appearance",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp)
                             )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "${userProgress.streakDays} Day Streak",
-                                color = AccentAmber,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        // Streak Tracker Pill
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(Color(0xFF2E1C0C))
+                                .border(1.dp, Color(0xFFF97316), RoundedCornerShape(20.dp))
+                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                                .testTag("streak_tracker_pill")
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.LocalFireDepartment,
+                                    contentDescription = "Streak",
+                                    tint = AccentAmber,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "${userProgress.streakDays}d Streak",
+                                    color = AccentAmber,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
                 }
@@ -206,8 +240,8 @@ fun HomeScreen(
                         .fillMaxWidth()
                         .testTag("progress_card"),
                     shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = DarkSurface),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, DarkBorder)
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
                         Row(
@@ -219,13 +253,13 @@ fun HomeScreen(
                                 text = "Daily Goal Progress",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = TextPrimaryDark
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 text = "${userProgress.questionsAnsweredToday}/${userProgress.dailyGoalTarget} questions",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium,
-                                color = AccentCyan
+                                color = PrimaryBlue
                             )
                         }
 
@@ -238,7 +272,7 @@ fun HomeScreen(
                                 .height(8.dp)
                                 .clip(RoundedCornerShape(4.dp)),
                             color = PrimaryBlue,
-                            trackColor = Color(0xFF282B33)
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant
                         )
 
                         Spacer(modifier = Modifier.height(18.dp))
@@ -248,7 +282,7 @@ fun HomeScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             StatBox(
-                                label = "Total Answered",
+                                label = "Total Solved",
                                 value = "${userProgress.totalQuestionsAnswered}",
                                 modifier = Modifier.weight(1f)
                             )
@@ -275,12 +309,11 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    // Badges Pill Card
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .clip(RoundedCornerShape(16.dp))
-                            .background(Color(0xFF261D13))
+                            .background(AccentAmber.copy(alpha = 0.12f))
                             .border(1.dp, Color(0xFFD97706), RoundedCornerShape(16.dp))
                             .clickable { onOpenAchievements() }
                             .padding(14.dp)
@@ -299,7 +332,7 @@ fun HomeScreen(
                                     text = "Badges",
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = TextPrimaryDark
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
                                     text = "$unlockedBadges/${achievements.size} Unlocked",
@@ -310,12 +343,11 @@ fun HomeScreen(
                         }
                     }
 
-                    // Leaderboard Pill Card
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .clip(RoundedCornerShape(16.dp))
-                            .background(Color(0xFF1B2335))
+                            .background(PrimaryBlue.copy(alpha = 0.12f))
                             .border(1.dp, PrimaryBlue, RoundedCornerShape(16.dp))
                             .clickable { onOpenLeaderboard() }
                             .padding(14.dp)
@@ -325,7 +357,7 @@ fun HomeScreen(
                             Icon(
                                 imageVector = Icons.Default.Leaderboard,
                                 contentDescription = null,
-                                tint = AccentCyan,
+                                tint = PrimaryBlue,
                                 modifier = Modifier.size(24.dp)
                             )
                             Spacer(modifier = Modifier.width(10.dp))
@@ -334,16 +366,41 @@ fun HomeScreen(
                                     text = "Leaderboard",
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = TextPrimaryDark
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
                                     text = if (myLeaderboardEntry != null) "Rank #${myLeaderboardEntry.rank}" else "Rank #4",
                                     fontSize = 11.sp,
-                                    color = AccentCyan
+                                    color = PrimaryBlue
                                 )
                             }
                         }
                     }
+                }
+            }
+
+            // Quick Tools: Flashcards & Study Guide
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    QuickToolCard(
+                        title = "Flashcard Mode",
+                        subtitle = "Swipe-to-reveal formulas",
+                        icon = Icons.Default.Style,
+                        modifier = Modifier.weight(1f),
+                        onClick = onOpenFlashcards,
+                        testTag = "home_flashcards_btn"
+                    )
+                    QuickToolCard(
+                        title = "Study Guide",
+                        subtitle = "Key exam cheat-sheet",
+                        icon = Icons.Default.MenuBook,
+                        modifier = Modifier.weight(1f),
+                        onClick = onOpenStudyGuide,
+                        testTag = "home_study_guide_btn"
+                    )
                 }
             }
 
@@ -449,8 +506,8 @@ fun HomeScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(18.dp))
-                        .background(DarkSurface)
-                        .border(1.dp, DarkBorder, RoundedCornerShape(18.dp))
+                        .background(MaterialTheme.colorScheme.surface)
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(18.dp))
                         .padding(18.dp)
                         .testTag("adaptive_learning_card")
                 ) {
@@ -459,7 +516,7 @@ fun HomeScreen(
                             Icon(
                                 imageVector = Icons.Default.AutoAwesome,
                                 contentDescription = null,
-                                tint = AccentCyan,
+                                tint = PrimaryBlue,
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
@@ -467,60 +524,35 @@ fun HomeScreen(
                                 text = "Adaptive Learning System",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = TextPrimaryDark
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
 
                         Spacer(modifier = Modifier.height(6.dp))
 
                         Text(
-                            text = "Dynamically adjusts question difficulty and domain focus based on your weak areas (Geodesy & COGO) while advancing curve geometry.",
+                            text = "Dynamically adjusts question difficulty and domain focus based on your weak areas while advancing curve geometry.",
                             fontSize = 13.sp,
                             lineHeight = 18.sp,
-                            color = TextSecondaryDark
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
 
                         Button(
                             onClick = onStartAdaptiveQuiz,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E3A8A)),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
                             shape = RoundedCornerShape(16.dp),
                             modifier = Modifier.testTag("btn_launch_adaptive_drill")
                         ) {
                             Text(
                                 text = "Start Adaptive Practice (10 Qs)",
-                                color = Color(0xFF93C5FD),
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 13.sp
                             )
                         }
                     }
-                }
-            }
-
-            // Quick Tools: Flashcards & Study Guide
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    QuickToolCard(
-                        title = "Flashcards",
-                        subtitle = "Rapid concept drills",
-                        icon = Icons.Default.Style,
-                        modifier = Modifier.weight(1f),
-                        onClick = onOpenFlashcards,
-                        testTag = "home_flashcards_btn"
-                    )
-                    QuickToolCard(
-                        title = "Study Guide",
-                        subtitle = "Key exam formulas",
-                        icon = Icons.Default.MenuBook,
-                        modifier = Modifier.weight(1f),
-                        onClick = onOpenStudyGuide,
-                        testTag = "home_study_guide_btn"
-                    )
                 }
             }
 
@@ -537,12 +569,12 @@ fun HomeScreen(
                                 text = "Exam Domains",
                                 fontSize = 19.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = TextPrimaryDark
+                                color = MaterialTheme.colorScheme.onBackground
                             )
                             Text(
                                 text = "Select a specific domain to answer practice questions",
                                 fontSize = 13.sp,
-                                color = TextSecondaryDark
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -555,7 +587,7 @@ fun HomeScreen(
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(16.dp))
-                                    .background(if (isSelected) PrimaryBlue else Color(0xFF22242A))
+                                    .background(if (isSelected) PrimaryBlue else MaterialTheme.colorScheme.surfaceVariant)
                                     .clickable { domainFilter = filter }
                                     .padding(horizontal = 14.dp, vertical = 7.dp)
                             ) {
@@ -563,7 +595,7 @@ fun HomeScreen(
                                     text = filter,
                                     fontSize = 13.sp,
                                     fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                    color = if (isSelected) Color.White else TextSecondaryDark
+                                    color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
@@ -598,12 +630,12 @@ fun HomeScreen(
                         text = "Completed Practice Modules",
                         fontSize = 19.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextPrimaryDark
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                     Text(
                         text = "Review answers, explanations, and score breakdowns",
                         fontSize = 13.sp,
-                        color = TextSecondaryDark
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -614,13 +646,13 @@ fun HomeScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(16.dp))
-                            .background(DarkSurface)
+                            .background(MaterialTheme.colorScheme.surface)
                             .padding(24.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = "No completed modules yet. Start your first quiz below!",
-                            color = TextSecondaryDark,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 14.sp
                         )
                     }
@@ -639,6 +671,75 @@ fun HomeScreen(
             }
         }
     }
+
+    // Appearance / Theme Picker Dialog
+    if (showThemeDialog) {
+        AlertDialog(
+            onDismissRequest = { showThemeDialog = false },
+            title = {
+                Text(
+                    text = "Appearance Theme",
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "Choose your preferred color theme:",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    AppThemeMode.entries.forEach { mode ->
+                        val isSelected = currentThemeMode == mode
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant)
+                                .clickable {
+                                    onSelectThemeMode(mode)
+                                    showThemeDialog = false
+                                }
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = isSelected,
+                                onClick = {
+                                    onSelectThemeMode(mode)
+                                    showThemeDialog = false
+                                },
+                                colors = RadioButtonDefaults.colors(selectedColor = PrimaryBlue)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Column {
+                                Text(
+                                    text = mode.title,
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = mode.subtitle,
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showThemeDialog = false }) {
+                    Text("Done")
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    }
 }
 
 @Composable
@@ -650,7 +751,7 @@ private fun StatBox(
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFF26282E))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(vertical = 10.dp, horizontal = 8.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -659,13 +760,13 @@ private fun StatBox(
                 text = value,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold,
-                color = TextPrimaryDark
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = label,
                 fontSize = 11.sp,
-                color = TextSecondaryDark
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -683,8 +784,8 @@ private fun QuickToolCard(
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(DarkSurface)
-            .border(1.dp, DarkBorder, RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
             .clickable { onClick() }
             .padding(14.dp)
             .testTag(testTag)
@@ -694,13 +795,13 @@ private fun QuickToolCard(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFF1E3A8A)),
+                    .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = AccentCyan,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -710,12 +811,12 @@ private fun QuickToolCard(
                     text = title,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = TextPrimaryDark
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = subtitle,
                     fontSize = 11.sp,
-                    color = TextSecondaryDark
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -743,8 +844,8 @@ private fun DomainCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(DarkSurface)
-            .border(1.dp, DarkBorder, RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
             .clickable { onStartQuiz() }
             .padding(16.dp)
             .testTag("domain_card_${domain.shortCode.lowercase()}")
@@ -758,13 +859,13 @@ private fun DomainCard(
                     modifier = Modifier
                         .size(42.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0xFF282B33)),
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = AccentCyan,
+                        tint = PrimaryBlue,
                         modifier = Modifier.size(22.dp)
                     )
                 }
@@ -776,12 +877,12 @@ private fun DomainCard(
                         text = domain.title,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = TextPrimaryDark
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = "${domain.targetExamQuestions} on exam",
                         fontSize = 12.sp,
-                        color = TextSecondaryDark
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
@@ -827,7 +928,7 @@ private fun DomainCard(
                 Text(
                     text = if (stat.attempted > 0) "Accuracy: $accuracy% (${stat.correct}/${stat.attempted})" else "Not tested yet",
                     fontSize = 12.sp,
-                    color = TextSecondaryDark
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = "Practice ›",
@@ -850,7 +951,7 @@ private fun DomainCard(
                     accuracy >= 50 -> Color(0xFFF59E0B)
                     else -> Color(0xFFEF4444)
                 },
-                trackColor = Color(0xFF282B33)
+                trackColor = MaterialTheme.colorScheme.surfaceVariant
             )
         }
     }
@@ -870,8 +971,8 @@ private fun CompletedModuleCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(DarkSurface)
-            .border(1.dp, DarkBorder, RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
             .clickable { onReview() }
             .padding(16.dp)
             .testTag("completed_module_${module.id}")
@@ -886,13 +987,13 @@ private fun CompletedModuleCard(
                     text = module.title,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = TextPrimaryDark
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "$dateStr • ${module.totalQuestions} questions",
                     fontSize = 12.sp,
-                    color = TextSecondaryDark
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 

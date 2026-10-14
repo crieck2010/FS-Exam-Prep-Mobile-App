@@ -47,11 +47,7 @@ import androidx.compose.ui.unit.sp
 import com.example.data.StudyGuideData
 import com.example.data.StudyTopic
 import com.example.ui.theme.AccentCyan
-import com.example.ui.theme.DarkBorder
-import com.example.ui.theme.DarkSurface
 import com.example.ui.theme.PrimaryBlue
-import com.example.ui.theme.TextPrimaryDark
-import com.example.ui.theme.TextSecondaryDark
 
 @Composable
 fun StudyGuideScreen(
@@ -92,12 +88,12 @@ fun StudyGuideScreen(
                         text = "Learn: FS Study Guide",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextPrimaryDark
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                     Text(
                         text = "Formulas, key concepts & exam tips",
                         fontSize = 12.sp,
-                        color = TextSecondaryDark
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -119,16 +115,16 @@ fun StudyGuideScreen(
                         Icon(
                             imageVector = Icons.Default.Search,
                             contentDescription = "Search",
-                            tint = TextSecondaryDark
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
                     singleLine = true,
                     shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = PrimaryBlue,
-                        unfocusedBorderColor = DarkBorder,
-                        focusedContainerColor = DarkSurface,
-                        unfocusedContainerColor = DarkSurface
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -155,8 +151,8 @@ private fun StudyTopicCard(topic: StudyTopic) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(DarkSurface)
-            .border(1.dp, DarkBorder, RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
             .clickable { expanded = !expanded }
             .padding(18.dp)
     ) {
@@ -170,14 +166,14 @@ private fun StudyTopicCard(topic: StudyTopic) {
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(6.dp))
-                            .background(Color(0xFF1E293B))
+                            .background(MaterialTheme.colorScheme.secondaryContainer)
                             .padding(horizontal = 8.dp, vertical = 3.dp)
                     ) {
                         Text(
                             text = topic.domain.title,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium,
-                            color = AccentCyan
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
                         )
                     }
                     Spacer(modifier = Modifier.height(6.dp))
@@ -185,14 +181,14 @@ private fun StudyTopicCard(topic: StudyTopic) {
                         text = topic.title,
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextPrimaryDark
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
                 Icon(
                     imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                     contentDescription = if (expanded) "Collapse" else "Expand",
-                    tint = TextSecondaryDark,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -203,7 +199,7 @@ private fun StudyTopicCard(topic: StudyTopic) {
                 text = topic.summary,
                 fontSize = 14.sp,
                 lineHeight = 20.sp,
-                color = Color(0xFFCBD5E1)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             AnimatedVisibility(visible = expanded) {
@@ -212,7 +208,7 @@ private fun StudyTopicCard(topic: StudyTopic) {
                         text = "Key Formulas:",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = TextPrimaryDark
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     topic.keyFormulas.forEach { formula ->
@@ -221,14 +217,14 @@ private fun StudyTopicCard(topic: StudyTopic) {
                                 .fillMaxWidth()
                                 .padding(vertical = 4.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0xFF0F172A))
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
                                 .padding(horizontal = 12.dp, vertical = 8.dp)
                         ) {
                             Text(
                                 text = formula,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium,
-                                color = AccentCyan
+                                color = PrimaryBlue
                             )
                         }
                     }
@@ -239,7 +235,7 @@ private fun StudyTopicCard(topic: StudyTopic) {
                         text = "Exam Tips & Gotchas:",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = TextPrimaryDark
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     topic.examTips.forEach { tip ->
@@ -249,7 +245,7 @@ private fun StudyTopicCard(topic: StudyTopic) {
                                 text = tip,
                                 fontSize = 13.sp,
                                 lineHeight = 18.sp,
-                                color = Color(0xFF94A3B8)
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }

@@ -38,7 +38,15 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            MyApplicationTheme(darkTheme = true) {
+            val themeMode by viewModel.themeMode.collectAsState()
+            val isSystemDark = androidx.compose.foundation.isSystemInDarkTheme()
+            val isDarkTheme = when (themeMode) {
+                com.example.model.AppThemeMode.SYSTEM -> isSystemDark
+                com.example.model.AppThemeMode.LIGHT -> false
+                com.example.model.AppThemeMode.DARK -> true
+            }
+
+            MyApplicationTheme(darkTheme = isDarkTheme) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     val currentScreen by viewModel.currentScreen.collectAsState()
                     val userProgress by viewModel.userProgress.collectAsState()
@@ -66,6 +74,8 @@ class MainActivity : ComponentActivity() {
                                 domainStats = domainStats,
                                 achievements = achievements,
                                 leaderboard = leaderboard,
+                                currentThemeMode = themeMode,
+                                onSelectThemeMode = { newMode -> viewModel.setThemeMode(newMode) },
                                 onStartDomainQuiz = { domain -> viewModel.startDomainQuiz(domain) },
                                 onStartAdaptiveQuiz = { viewModel.startAdaptiveQuiz() },
                                 onStartMockExam = { viewModel.startMockExam() },

@@ -53,15 +53,10 @@ import com.example.ui.theme.AccentCyan
 import com.example.ui.theme.CorrectBadgeBg
 import com.example.ui.theme.CorrectBadgeText
 import com.example.ui.theme.CorrectOptionBorder
-import com.example.ui.theme.DarkBorder
-import com.example.ui.theme.DarkSurface
-import com.example.ui.theme.DarkSurfaceHighlight
 import com.example.ui.theme.IncorrectBadgeBg
 import com.example.ui.theme.IncorrectBadgeText
 import com.example.ui.theme.IncorrectOptionBorder
 import com.example.ui.theme.PrimaryBlue
-import com.example.ui.theme.TextPrimaryDark
-import com.example.ui.theme.TextSecondaryDark
 
 @Composable
 fun QuizScreen(
@@ -227,7 +222,7 @@ fun QuizScreen(
                 text = "Question ${currentIndex + 1}",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = TextSecondaryDark
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -236,14 +231,14 @@ fun QuizScreen(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(6.dp))
-                    .background(Color(0xFF1E2638))
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
                     .padding(horizontal = 8.dp, vertical = 4.dp)
             ) {
                 Text(
                     text = currentQuestion.domain.title,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Medium,
-                    color = AccentCyan
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
 
@@ -255,7 +250,7 @@ fun QuizScreen(
                 fontSize = 18.sp,
                 lineHeight = 26.sp,
                 fontWeight = FontWeight.Normal,
-                color = TextPrimaryDark
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -272,17 +267,17 @@ fun QuizScreen(
                 val showAsIncorrect = isAnswered && isSelected && !isCorrect
 
                 val cardBg = when {
-                    showAsCorrect -> Color(0xFF16251E)
-                    showAsIncorrect -> Color(0xFF28181A)
-                    isSelected -> DarkSurfaceHighlight
-                    else -> DarkSurface
+                    showAsCorrect -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+                    showAsIncorrect -> IncorrectBadgeBg.copy(alpha = 0.5f)
+                    isSelected -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
+                    else -> MaterialTheme.colorScheme.surface
                 }
 
                 val borderColor = when {
                     showAsCorrect -> CorrectOptionBorder
                     showAsIncorrect -> IncorrectOptionBorder
                     isSelected -> PrimaryBlue
-                    else -> DarkBorder
+                    else -> MaterialTheme.colorScheme.outline
                 }
 
                 Box(
@@ -310,7 +305,7 @@ fun QuizScreen(
                                 text = "$letter.",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = TextPrimaryDark,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.padding(end = 12.dp)
                             )
 
@@ -319,7 +314,7 @@ fun QuizScreen(
                                 text = optionText,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Normal,
-                                color = TextPrimaryDark,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.weight(1f)
                             )
 
@@ -328,7 +323,7 @@ fun QuizScreen(
                                 Text(
                                     text = "(Your answer)",
                                     fontSize = 13.sp,
-                                    color = TextSecondaryDark,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(end = 8.dp)
                                 )
                             }
@@ -339,7 +334,7 @@ fun QuizScreen(
                                         Text(
                                             text = "(Your answer)",
                                             fontSize = 12.sp,
-                                            color = TextSecondaryDark,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             modifier = Modifier.padding(end = 6.dp)
                                         )
                                     }
@@ -371,7 +366,7 @@ fun QuizScreen(
                                     Text(
                                         text = "(Your answer)",
                                         fontSize = 12.sp,
-                                        color = TextSecondaryDark,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.padding(end = 6.dp)
                                     )
                                     Box(
@@ -401,7 +396,7 @@ fun QuizScreen(
                                     text = currentQuestion.explanation,
                                     fontSize = 14.sp,
                                     lineHeight = 20.sp,
-                                    color = Color(0xFFCBD5E1)
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
 
                                 if (currentQuestion.formulaHighlight != null && isCorrect) {
@@ -409,14 +404,14 @@ fun QuizScreen(
                                     Box(
                                         modifier = Modifier
                                             .clip(RoundedCornerShape(6.dp))
-                                            .background(Color(0xFF0F172A))
+                                            .background(MaterialTheme.colorScheme.secondaryContainer)
                                             .padding(horizontal = 10.dp, vertical = 6.dp)
                                     ) {
                                         Text(
                                             text = currentQuestion.formulaHighlight,
                                             fontSize = 13.sp,
                                             fontWeight = FontWeight.Medium,
-                                            color = AccentCyan
+                                            color = MaterialTheme.colorScheme.onSecondaryContainer
                                         )
                                     }
                                 }
@@ -441,10 +436,10 @@ fun QuizScreen(
                     },
                     enabled = currentIndex > 0,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF2C2F36),
-                        disabledContainerColor = Color(0xFF1E2024),
-                        contentColor = TextPrimaryDark,
-                        disabledContentColor = Color(0xFF555860)
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                     ),
                     shape = RoundedCornerShape(24.dp),
                     modifier = Modifier
@@ -495,7 +490,7 @@ fun QuizScreen(
                 ) {
                     Text(
                         text = "Back to score summary",
-                        color = TextSecondaryDark,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 14.sp
                     )
                 }

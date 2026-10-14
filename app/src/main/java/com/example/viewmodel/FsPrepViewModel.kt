@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import com.example.data.QuestionBank
 import com.example.data.QuizRepository
 import com.example.model.Achievement
+import com.example.model.AppThemeMode
 import com.example.model.CompletedModule
 import com.example.model.DomainStat
 import com.example.model.FsDomain
@@ -39,6 +40,7 @@ class FsPrepViewModel(application: Application) : AndroidViewModel(application) 
     val achievements: StateFlow<List<Achievement>> = repository.achievements
     val leaderboard: StateFlow<List<LeaderboardUser>> = repository.leaderboard
     val userHandle: StateFlow<String> = repository.userHandle
+    val themeMode: StateFlow<AppThemeMode> = repository.themeMode
 
     private val _currentScreen = MutableStateFlow(ScreenState.HOME)
     val currentScreen: StateFlow<ScreenState> = _currentScreen.asStateFlow()
@@ -209,5 +211,9 @@ class FsPrepViewModel(application: Application) : AndroidViewModel(application) 
 
     fun openStudyGuide() {
         _currentScreen.value = ScreenState.STUDY_GUIDE
+    }
+
+    fun setThemeMode(mode: AppThemeMode) {
+        repository.setThemeMode(mode)
     }
 }

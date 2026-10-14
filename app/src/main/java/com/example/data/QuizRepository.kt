@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.example.model.Achievement
 import com.example.model.AchievementCategory
+import com.example.model.AppThemeMode
 import com.example.model.CompletedModule
 import com.example.model.DomainStat
 import com.example.model.FsDomain
@@ -46,6 +47,9 @@ class QuizRepository(context: Context) {
     private val _userHandle = MutableStateFlow("Surveyor#402")
     val userHandle: StateFlow<String> = _userHandle.asStateFlow()
 
+    private val _themeMode = MutableStateFlow(AppThemeMode.SYSTEM)
+    val themeMode: StateFlow<AppThemeMode> = _themeMode.asStateFlow()
+
     init {
         loadData()
     }
@@ -53,6 +57,13 @@ class QuizRepository(context: Context) {
     private fun loadData() {
         val savedHandle = prefs.getString("user_handle", "Surveyor#402") ?: "Surveyor#402"
         _userHandle.value = savedHandle
+
+        val themeStr = prefs.getString("app_theme_mode", AppThemeMode.SYSTEM.name) ?: AppThemeMode.SYSTEM.name
+        _themeMode.value = try {
+            AppThemeMode.valueOf(themeStr)
+        } catch (e: Exception) {
+            AppThemeMode.SYSTEM
+        }
 
         val modulesJson = prefs.getString("modules_json", null)
         val modules = if (modulesJson != null) {
@@ -98,6 +109,11 @@ class QuizRepository(context: Context) {
             prefs.edit().putString("user_handle", trimmed).apply()
             refreshLeaderboard(_userProgress.value)
         }
+    }
+
+    fun setThemeMode(mode: AppThemeMode) {
+        _themeMode.value = mode
+        prefs.edit().putString("app_theme_mode", mode.name).apply()
     }
 
     private fun seedInitialModules(): List<CompletedModule> {

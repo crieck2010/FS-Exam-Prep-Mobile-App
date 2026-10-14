@@ -49,6 +49,8 @@ fun ArcScoreGauge(
         )
     }
 
+    val trackColor = MaterialTheme.colorScheme.surfaceVariant
+
     Column(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -66,7 +68,7 @@ fun ArcScoreGauge(
 
                 // Background track (180 degrees from 180° to 360°)
                 drawArc(
-                    color = Color(0xFF282B33),
+                    color = trackColor,
                     startAngle = 180f,
                     sweepAngle = 180f,
                     useCenter = false,

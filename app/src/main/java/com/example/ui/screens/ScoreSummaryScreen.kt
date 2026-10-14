@@ -41,11 +41,9 @@ import androidx.compose.ui.unit.sp
 import com.example.model.CompletedModule
 import com.example.model.DomainStat
 import com.example.model.FsDomain
+import androidx.compose.foundation.border
 import com.example.ui.components.ArcScoreGauge
-import com.example.ui.theme.DarkSurface
 import com.example.ui.theme.PrimaryBlue
-import com.example.ui.theme.TextPrimaryDark
-import com.example.ui.theme.TextSecondaryDark
 
 @Composable
 fun ScoreSummaryScreen(
@@ -122,7 +120,7 @@ fun ScoreSummaryScreen(
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 lineHeight = 30.sp,
-                color = TextPrimaryDark
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(modifier = Modifier.height(28.dp))
@@ -132,7 +130,7 @@ fun ScoreSummaryScreen(
                 text = "Strengths",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = TextPrimaryDark
+                color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -156,7 +154,7 @@ fun ScoreSummaryScreen(
                 text = "Focus areas",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = TextPrimaryDark
+                color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -180,7 +178,7 @@ fun ScoreSummaryScreen(
                 text = "Keep Learning",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = TextPrimaryDark
+                color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.height(14.dp))
 
@@ -259,7 +257,7 @@ private fun BulletInsight(
         Text(
             text = "○ ",
             fontSize = 14.sp,
-            color = TextSecondaryDark,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 2.dp)
         )
         Column(modifier = Modifier.weight(1f)) {
@@ -267,14 +265,14 @@ private fun BulletInsight(
                 text = domainTitle,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 15.sp,
-                color = TextPrimaryDark
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = detail,
                 fontSize = 14.sp,
                 lineHeight = 22.sp,
-                color = Color(0xFFCBD5E1)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -293,7 +291,8 @@ private fun LearningActionCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(DarkSurface)
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
             .clickable { onClick() }
             .padding(20.dp)
             .testTag(testTag)
@@ -308,12 +307,12 @@ private fun LearningActionCard(
                         text = title,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextPrimaryDark
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = badge,
                         fontSize = 12.sp,
-                        color = TextSecondaryDark
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Icon(
@@ -330,7 +329,7 @@ private fun LearningActionCard(
                 text = description,
                 fontSize = 14.sp,
                 lineHeight = 20.sp,
-                color = Color(0xFFCBD5E1)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

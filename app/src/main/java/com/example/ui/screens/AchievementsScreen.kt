@@ -48,11 +48,7 @@ import com.example.ui.theme.AccentAmber
 import com.example.ui.theme.AccentCyan
 import com.example.ui.theme.CorrectBadgeBg
 import com.example.ui.theme.CorrectBadgeText
-import com.example.ui.theme.DarkBorder
-import com.example.ui.theme.DarkSurface
 import com.example.ui.theme.PrimaryBlue
-import com.example.ui.theme.TextPrimaryDark
-import com.example.ui.theme.TextSecondaryDark
 
 @Composable
 fun AchievementsScreen(
@@ -93,7 +89,7 @@ fun AchievementsScreen(
                         text = "Achievement Badges",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextPrimaryDark
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                     Text(
                         text = "$unlockedCount of $totalCount Unlocked",
@@ -117,7 +113,7 @@ fun AchievementsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(18.dp))
-                        .background(Color(0xFF261D13))
+                        .background(AccentAmber.copy(alpha = 0.12f))
                         .border(1.dp, Color(0xFFD97706), RoundedCornerShape(18.dp))
                         .padding(20.dp)
                 ) {
@@ -131,7 +127,7 @@ fun AchievementsScreen(
                                 text = "Surveyor Milestones",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = TextPrimaryDark
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 text = "$unlockedCount / $totalCount",
@@ -148,13 +144,13 @@ fun AchievementsScreen(
                                 .height(8.dp)
                                 .clip(RoundedCornerShape(4.dp)),
                             color = AccentAmber,
-                            trackColor = Color(0xFF382A1B)
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "Earn badges for study consistency, high accuracy, and domain mastery.",
                             fontSize = 12.sp,
-                            color = TextSecondaryDark
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -218,7 +214,7 @@ private fun FilterChipItem(
             text = label,
             fontSize = 13.sp,
             fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-            color = if (isSelected) Color.White else TextSecondaryDark
+            color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -231,10 +227,10 @@ private fun AchievementCard(achievement: Achievement) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(if (isUnlocked) DarkSurface else Color(0xFF191A1E))
+            .background(if (isUnlocked) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
             .border(
                 1.dp,
-                if (isUnlocked) Color(0xFF38BDF8) else DarkBorder,
+                if (isUnlocked) PrimaryBlue else MaterialTheme.colorScheme.outline,
                 RoundedCornerShape(16.dp)
             )
             .padding(16.dp)
@@ -249,10 +245,10 @@ private fun AchievementCard(achievement: Achievement) {
                 modifier = Modifier
                     .size(52.dp)
                     .clip(CircleShape)
-                    .background(if (isUnlocked) Color(0xFF1E3A8A) else Color(0xFF22242A))
+                    .background(if (isUnlocked) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant)
                     .border(
                         1.5.dp,
-                        if (isUnlocked) AccentCyan else Color(0xFF323640),
+                        if (isUnlocked) PrimaryBlue else MaterialTheme.colorScheme.outline,
                         CircleShape
                     ),
                 contentAlignment = Alignment.Center
@@ -263,7 +259,7 @@ private fun AchievementCard(achievement: Achievement) {
                     Icon(
                         imageVector = Icons.Default.Lock,
                         contentDescription = "Locked",
-                        tint = TextSecondaryDark,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(22.dp)
                     )
                 }
@@ -281,7 +277,7 @@ private fun AchievementCard(achievement: Achievement) {
                         text = achievement.title,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (isUnlocked) TextPrimaryDark else Color(0xFF8B92A0)
+                        color = if (isUnlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     if (isUnlocked) {
@@ -316,7 +312,7 @@ private fun AchievementCard(achievement: Achievement) {
                     text = achievement.description,
                     fontSize = 12.sp,
                     lineHeight = 16.sp,
-                    color = if (isUnlocked) Color(0xFFCBD5E1) else TextSecondaryDark
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 if (!isUnlocked) {
@@ -332,14 +328,14 @@ private fun AchievementCard(achievement: Achievement) {
                                 .weight(1f)
                                 .height(5.dp)
                                 .clip(RoundedCornerShape(3.dp)),
-                            color = AccentCyan,
-                            trackColor = Color(0xFF282B33)
+                            color = PrimaryBlue,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "${achievement.currentProgress}/${achievement.targetProgress}",
                             fontSize = 11.sp,
-                            color = TextSecondaryDark
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }

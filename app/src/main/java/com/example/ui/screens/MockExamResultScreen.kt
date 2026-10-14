@@ -47,14 +47,9 @@ import com.example.ui.components.ArcScoreGauge
 import com.example.ui.theme.AccentCyan
 import com.example.ui.theme.CorrectBadgeBg
 import com.example.ui.theme.CorrectBadgeText
-import com.example.ui.theme.DarkBorder
-import com.example.ui.theme.DarkSurface
-import com.example.ui.theme.DarkSurfaceVariant
 import com.example.ui.theme.IncorrectBadgeBg
 import com.example.ui.theme.IncorrectBadgeText
 import com.example.ui.theme.PrimaryBlue
-import com.example.ui.theme.TextPrimaryDark
-import com.example.ui.theme.TextSecondaryDark
 
 @Composable
 fun MockExamResultScreen(
@@ -148,7 +143,7 @@ fun MockExamResultScreen(
                             else
                                 "Score: ${result.scorePercentage}% • Focus on targeted domain drills to reach the 70% threshold.",
                             fontSize = 13.sp,
-                            color = TextPrimaryDark
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -175,28 +170,30 @@ fun MockExamResultScreen(
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(DarkSurface)
+                        .background(MaterialTheme.colorScheme.surface)
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
                         .padding(14.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = "Total Time", fontSize = 12.sp, color = TextSecondaryDark)
+                        Text(text = "Total Time", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(text = durationFormatted, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimaryDark)
+                        Text(text = durationFormatted, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     }
                 }
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(DarkSurface)
+                        .background(MaterialTheme.colorScheme.surface)
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
                         .padding(14.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = "Average Pace", fontSize = 12.sp, color = TextSecondaryDark)
+                        Text(text = "Average Pace", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(text = avgPaceFormatted, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimaryDark)
+                        Text(text = avgPaceFormatted, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     }
                 }
             }
@@ -208,13 +205,13 @@ fun MockExamResultScreen(
                 text = "Score Breakdown by Domain",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = TextPrimaryDark
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "Performance across all NCEES exam specifications",
                 fontSize = 13.sp,
-                color = TextSecondaryDark
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -241,8 +238,8 @@ fun MockExamResultScreen(
                         .fillMaxWidth()
                         .padding(vertical = 5.dp)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(DarkSurface)
-                        .border(1.dp, DarkBorder, RoundedCornerShape(14.dp))
+                        .background(MaterialTheme.colorScheme.surface)
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(14.dp))
                         .padding(14.dp)
                 ) {
                     Column {
@@ -255,7 +252,7 @@ fun MockExamResultScreen(
                                 text = domain.title,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = TextPrimaryDark,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.weight(1f)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
@@ -324,14 +321,17 @@ fun MockExamResultScreen(
 
             Button(
                 onClick = onReturnHome,
-                colors = ButtonDefaults.buttonColors(containerColor = DarkSurfaceVariant),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
                 shape = RoundedCornerShape(24.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
                     .testTag("btn_return_home_mock")
             ) {
-                Text("Return to Dashboard", fontSize = 15.sp, color = TextPrimaryDark)
+                Text("Return to Dashboard", fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
             Spacer(modifier = Modifier.height(30.dp))

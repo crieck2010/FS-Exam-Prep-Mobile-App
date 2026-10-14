@@ -64,13 +64,7 @@ import com.example.model.MockExamResult
 import com.example.model.Question
 import com.example.ui.theme.AccentAmber
 import com.example.ui.theme.AccentCyan
-import com.example.ui.theme.DarkBorder
-import com.example.ui.theme.DarkSurface
-import com.example.ui.theme.DarkSurfaceHighlight
-import com.example.ui.theme.DarkSurfaceVariant
 import com.example.ui.theme.PrimaryBlue
-import com.example.ui.theme.TextPrimaryDark
-import com.example.ui.theme.TextSecondaryDark
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -158,7 +152,7 @@ fun MockExamScreen(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Exit Exam",
-                            tint = TextSecondaryDark
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
 
@@ -211,7 +205,7 @@ fun MockExamScreen(
                             Icon(
                                 imageVector = if (isFlagged) Icons.Default.Flag else Icons.Default.OutlinedFlag,
                                 contentDescription = "Flag for review",
-                                tint = if (isFlagged) AccentAmber else TextSecondaryDark
+                                tint = if (isFlagged) AccentAmber else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
 
@@ -245,7 +239,7 @@ fun MockExamScreen(
                         text = "NCEES FS CBT Simulation",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
-                        color = TextSecondaryDark
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
                         text = "Question ${currentIndex + 1} of ${questions.size} • Answered: ${userAnswers.size}/${questions.size}",
@@ -343,14 +337,14 @@ fun MockExamScreen(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(6.dp))
-                    .background(Color(0xFF1E2638))
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
                     .padding(horizontal = 8.dp, vertical = 4.dp)
             ) {
                 Text(
                     text = currentQuestion.domain.title,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Medium,
-                    color = AccentCyan
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
 
@@ -362,7 +356,7 @@ fun MockExamScreen(
                 fontSize = 18.sp,
                 lineHeight = 26.sp,
                 fontWeight = FontWeight.Normal,
-                color = TextPrimaryDark
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -378,10 +372,13 @@ fun MockExamScreen(
                         .fillMaxWidth()
                         .padding(vertical = 6.dp)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(if (isSelected) DarkSurfaceHighlight else DarkSurface)
+                        .background(
+                            if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f)
+                            else MaterialTheme.colorScheme.surface
+                        )
                         .border(
                             1.dp,
-                            if (isSelected) PrimaryBlue else DarkBorder,
+                            if (isSelected) PrimaryBlue else MaterialTheme.colorScheme.outline,
                             RoundedCornerShape(14.dp)
                         )
                         .clickable {
@@ -398,14 +395,14 @@ fun MockExamScreen(
                             text = "$letter.",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = if (isSelected) AccentCyan else TextPrimaryDark,
+                            color = if (isSelected) PrimaryBlue else MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(end = 12.dp)
                         )
                         Text(
                             text = optionText,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Normal,
-                            color = TextPrimaryDark,
+                            color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.weight(1f)
                         )
                         if (isSelected) {
@@ -413,7 +410,7 @@ fun MockExamScreen(
                                 text = "Selected",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = AccentCyan
+                                color = PrimaryBlue
                             )
                         }
                     }
@@ -429,7 +426,7 @@ fun MockExamScreen(
         ModalBottomSheet(
             onDismissRequest = { showPaletteSheet = false },
             sheetState = paletteSheetState,
-            containerColor = DarkSurface
+            containerColor = MaterialTheme.colorScheme.surface
         ) {
             Column(
                 modifier = Modifier
@@ -441,13 +438,13 @@ fun MockExamScreen(
                     text = "Question Palette",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimaryDark
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Tap any question to jump directly to it",
                     fontSize = 12.sp,
-                    color = TextSecondaryDark
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Spacer(modifier = Modifier.height(14.dp))
@@ -488,7 +485,7 @@ fun MockExamScreen(
                                 .background(bg)
                                 .border(
                                     if (isQFlagged) 2.dp else if (isCurrent) 2.dp else 1.dp,
-                                    if (isQFlagged) AccentAmber else if (isCurrent) Color.White else DarkBorder,
+                                    if (isQFlagged) AccentAmber else if (isCurrent) Color.White else MaterialTheme.colorScheme.outline,
                                     RoundedCornerShape(8.dp)
                                 )
                                 .clickable {
@@ -564,7 +561,7 @@ fun MockExamScreen(
                     Text("Keep Testing")
                 }
             },
-            containerColor = DarkSurface
+            containerColor = MaterialTheme.colorScheme.surface
         )
     }
 
@@ -590,7 +587,7 @@ fun MockExamScreen(
                     Text("Continue Exam")
                 }
             },
-            containerColor = DarkSurface
+            containerColor = MaterialTheme.colorScheme.surface
         )
     }
 }
@@ -645,6 +642,6 @@ private fun LegendItem(color: Color, label: String) {
                 .background(color)
         )
         Spacer(modifier = Modifier.width(6.dp))
-        Text(text = label, fontSize = 12.sp, color = TextSecondaryDark)
+        Text(text = label, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

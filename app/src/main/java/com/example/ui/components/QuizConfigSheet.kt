@@ -267,9 +267,9 @@ fun ChipOption(
     modifier: Modifier = Modifier,
     icon: (@Composable () -> Unit)? = null
 ) {
-    val bgColor = if (selected) Color(0xFF1E3A8A) else Color(0xFF23252B)
-    val borderColor = if (selected) PrimaryBlue else Color(0xFF323640)
-    val textColor = if (selected) Color(0xFF93C5FD) else Color(0xFFE2E8F0)
+    val bgColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
+    val borderColor = if (selected) PrimaryBlue else MaterialTheme.colorScheme.outline
+    val textColor = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
 
     Box(
         modifier = modifier

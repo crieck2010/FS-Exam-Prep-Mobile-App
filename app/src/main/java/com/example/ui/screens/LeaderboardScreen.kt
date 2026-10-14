@@ -50,11 +50,7 @@ import androidx.compose.ui.unit.sp
 import com.example.model.LeaderboardUser
 import com.example.ui.theme.AccentAmber
 import com.example.ui.theme.AccentCyan
-import com.example.ui.theme.DarkBorder
-import com.example.ui.theme.DarkSurface
 import com.example.ui.theme.PrimaryBlue
-import com.example.ui.theme.TextPrimaryDark
-import com.example.ui.theme.TextSecondaryDark
 
 @Composable
 fun LeaderboardScreen(
@@ -100,12 +96,12 @@ fun LeaderboardScreen(
                         text = "Community Leaderboard",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextPrimaryDark
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                     Text(
                         text = "Anonymous peer ranking for NCEES FS exam prep",
                         fontSize = 12.sp,
-                        color = TextSecondaryDark
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -124,7 +120,7 @@ fun LeaderboardScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(18.dp))
-                        .background(Color(0xFF1E283D))
+                        .background(MaterialTheme.colorScheme.primaryContainer)
                         .border(1.dp, PrimaryBlue, RoundedCornerShape(18.dp))
                         .padding(18.dp)
                 ) {
@@ -139,7 +135,7 @@ fun LeaderboardScreen(
                                     text = currentUserHandle,
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color.White
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 IconButton(
@@ -152,7 +148,7 @@ fun LeaderboardScreen(
                                     Icon(
                                         imageVector = Icons.Default.Edit,
                                         contentDescription = "Change handle",
-                                        tint = AccentCyan,
+                                        tint = PrimaryBlue,
                                         modifier = Modifier.size(16.dp)
                                     )
                                 }
@@ -161,7 +157,7 @@ fun LeaderboardScreen(
                             Text(
                                 text = "Your Anonymous Callsign",
                                 fontSize = 12.sp,
-                                color = TextSecondaryDark
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                             )
                         }
 
@@ -197,7 +193,7 @@ fun LeaderboardScreen(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(16.dp))
-                                .background(if (isSelected) PrimaryBlue else Color(0xFF22242B))
+                                .background(if (isSelected) PrimaryBlue else MaterialTheme.colorScheme.surfaceVariant)
                                 .clickable { selectedFilter = filter }
                                 .padding(horizontal = 14.dp, vertical = 7.dp)
                         ) {
@@ -205,7 +201,7 @@ fun LeaderboardScreen(
                                 text = filter,
                                 fontSize = 13.sp,
                                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                color = if (isSelected) Color.White else TextSecondaryDark
+                                color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -233,7 +229,7 @@ fun LeaderboardScreen(
                     Text(
                         text = "Choose a privacy-friendly username to display on the peer leaderboard.",
                         fontSize = 13.sp,
-                        color = TextSecondaryDark
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     OutlinedTextField(
@@ -261,7 +257,7 @@ fun LeaderboardScreen(
                     Text("Cancel")
                 }
             },
-            containerColor = DarkSurface
+            containerColor = MaterialTheme.colorScheme.surface
         )
     }
 }
@@ -274,17 +270,17 @@ private fun LeaderboardRow(user: LeaderboardUser) {
         1 -> Color(0xFFFFD700) // Gold
         2 -> Color(0xFFC0C0C0) // Silver
         3 -> Color(0xFFCD7F32) // Bronze
-        else -> TextSecondaryDark
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
-            .background(if (isMe) Color(0xFF1B2335) else DarkSurface)
+            .background(if (isMe) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f) else MaterialTheme.colorScheme.surface)
             .border(
                 1.dp,
-                if (isMe) PrimaryBlue else DarkBorder,
+                if (isMe) PrimaryBlue else MaterialTheme.colorScheme.outline,
                 RoundedCornerShape(14.dp)
             )
             .padding(14.dp)
@@ -299,7 +295,7 @@ private fun LeaderboardRow(user: LeaderboardUser) {
                 modifier = Modifier
                     .size(36.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFF262A34)),
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
                 if (user.rank <= 3) {
@@ -327,21 +323,21 @@ private fun LeaderboardRow(user: LeaderboardUser) {
                         text = user.handle,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = if (isMe) AccentCyan else TextPrimaryDark
+                        color = if (isMe) PrimaryBlue else MaterialTheme.colorScheme.onSurface
                     )
                     if (isMe) {
                         Spacer(modifier = Modifier.width(6.dp))
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(6.dp))
-                                .background(Color(0xFF1E3A8A))
+                                .background(MaterialTheme.colorScheme.primaryContainer)
                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                         ) {
                             Text(
                                 text = "YOU",
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF93C5FD)
+                                color = PrimaryBlue
                             )
                         }
                     }
@@ -351,10 +347,10 @@ private fun LeaderboardRow(user: LeaderboardUser) {
                     Text(
                         text = "${user.questionsAnswered} questions • ${user.accuracy}% acc",
                         fontSize = 12.sp,
-                        color = TextSecondaryDark
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     if (user.badgeLabel != null) {
-                        Text(text = " • ", color = TextSecondaryDark, fontSize = 12.sp)
+                        Text(text = " • ", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                         Text(
                             text = user.badgeLabel,
                             fontSize = 11.sp,
@@ -371,7 +367,7 @@ private fun LeaderboardRow(user: LeaderboardUser) {
                     text = "${user.scorePoints} pts",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimaryDark
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
