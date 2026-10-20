@@ -1,9 +1,10 @@
 package com.example.ui.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,21 +24,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.SwipeVertical
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -59,6 +55,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -68,25 +65,22 @@ import androidx.compose.ui.unit.sp
 import com.example.data.FlashcardItem
 import com.example.data.StudyGuideData
 import com.example.model.FsDomain
-import com.example.ui.theme.AccentAmber
-import com.example.ui.theme.AccentCyan
-import com.example.ui.theme.CorrectBadgeBg
-import com.example.ui.theme.CorrectBadgeText
-import com.example.ui.theme.IncorrectBadgeBg
-import com.example.ui.theme.IncorrectBadgeText
-import com.example.ui.theme.PrimaryBlue
+import com.example.ui.theme.SerifSectionHeading
+import com.example.ui.theme.TabularNumStyle
+import com.example.ui.theme.calm
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FlashcardsScreen(
     initialCards: List<FlashcardItem> = StudyGuideData.flashcards,
+    initialDomain: FsDomain? = null,
     onBack: () -> Unit
 ) {
     BackHandler { onBack() }
 
-    var selectedDomain by remember { mutableStateOf<FsDomain?>(null) }
-    var deck = remember(selectedDomain) {
+    var selectedDomain by remember { mutableStateOf<FsDomain?>(initialDomain) }
+    val deck = remember(selectedDomain) {
         val filtered = if (selectedDomain != null) {
             initialCards.filter { it.domain == selectedDomain }
         } else {
@@ -95,65 +89,67 @@ fun FlashcardsScreen(
         mutableStateListOf<FlashcardItem>().apply { addAll(filtered) }
     }
 
-    var currentIndex by remember(deck) { mutableIntStateOf(0) }
+    var currentIndex by remember(selectedDomain) { mutableIntStateOf(0) }
     var isRevealed by remember { mutableStateOf(false) }
 
     val masteredCardIds = remember { mutableStateListOf<String>() }
     val needsPracticeCardIds = remember { mutableStateListOf<String>() }
+
+    val currentCard = deck.getOrNull(currentIndex)
+
+    val rotation by animateFloatAsState(
+        targetValue = if (isRevealed) 180f else 0f,
+        animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing),
+        label = "flashcard_rotation"
+    )
 
     var dragOffsetY by remember { mutableFloatStateOf(0f) }
     var dragOffsetX by remember { mutableFloatStateOf(0f) }
 
     val animatedOffsetY by animateFloatAsState(
         targetValue = dragOffsetY,
-        animationSpec = spring(),
-        label = "drag_offset_y"
+        animationSpec = tween(durationMillis = 150),
+        label = "card_drag_y"
     )
-
     val animatedOffsetX by animateFloatAsState(
         targetValue = dragOffsetX,
-        animationSpec = spring(),
-        label = "drag_offset_x"
+        animationSpec = tween(durationMillis = 150),
+        label = "card_drag_x"
     )
 
-    val rotation by animateFloatAsState(
-        targetValue = if (isRevealed) 180f else 0f,
-        animationSpec = tween(durationMillis = 350),
-        label = "card_flip_rotation"
-    )
-
-    val currentCard = if (deck.isNotEmpty()) deck.getOrElse(currentIndex) { deck.first() } else null
+    val density = LocalDensity.current.density
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = MaterialTheme.calm.bg,
         topBar = {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(MaterialTheme.calm.surface)
                     .padding(horizontal = 16.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = onBack, modifier = Modifier.testTag("flashcards_back_button")) {
+                    IconButton(onClick = onBack, modifier = Modifier.testTag("flashcards_back_btn")) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = MaterialTheme.colorScheme.onBackground
+                            tint = MaterialTheme.calm.steel
                         )
                     }
                     Spacer(modifier = Modifier.width(6.dp))
                     Column {
                         Text(
                             text = "Flashcard Study Mode",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onBackground
+                            style = SerifSectionHeading.copy(color = MaterialTheme.calm.ink)
                         )
                         Text(
                             text = if (deck.isNotEmpty()) "Card ${currentIndex + 1} of ${deck.size} • Mastered: ${masteredCardIds.size}" else "0 cards",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            style = TabularNumStyle.copy(
+                                fontSize = 12.sp,
+                                color = MaterialTheme.calm.steel
+                            )
                         )
                     }
                 }
@@ -172,7 +168,7 @@ fun FlashcardsScreen(
                     Icon(
                         imageVector = Icons.Default.Shuffle,
                         contentDescription = "Shuffle",
-                        tint = AccentCyan
+                        tint = MaterialTheme.calm.steel
                     )
                 }
             }
@@ -192,21 +188,28 @@ fun FlashcardsScreen(
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 val allSelected = (selectedDomain == null)
+                val allBg = if (allSelected) MaterialTheme.calm.accentContainer else MaterialTheme.calm.surface
+                val allBorder = if (allSelected) MaterialTheme.calm.accent else MaterialTheme.calm.divider
+                val allText = if (allSelected) MaterialTheme.calm.accentBright else MaterialTheme.calm.steel
+
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(if (allSelected) PrimaryBlue else MaterialTheme.colorScheme.surfaceVariant)
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(allBg)
+                        .border(1.dp, allBorder, RoundedCornerShape(6.dp))
                         .clickable {
                             selectedDomain = null
                             isRevealed = false
                         }
-                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                        .padding(horizontal = 10.dp, vertical = 5.dp)
                 ) {
                     Text(
                         text = "All (${initialCards.size})",
-                        fontSize = 11.sp,
-                        fontWeight = if (allSelected) FontWeight.Bold else FontWeight.Normal,
-                        color = if (allSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                        style = TabularNumStyle.copy(
+                            fontSize = 11.sp,
+                            fontWeight = if (allSelected) FontWeight.SemiBold else FontWeight.Normal,
+                            color = allText
+                        )
                     )
                 }
 
@@ -219,29 +222,34 @@ fun FlashcardsScreen(
                     FsDomain.APPLIED_MATH_COGO
                 ).forEach { dom ->
                     val isDomSelected = (selectedDomain == dom)
+                    val domBg = if (isDomSelected) MaterialTheme.calm.accentContainer else MaterialTheme.calm.surface
+                    val domBorder = if (isDomSelected) MaterialTheme.calm.accent else MaterialTheme.calm.divider
+                    val domText = if (isDomSelected) MaterialTheme.calm.accentBright else MaterialTheme.calm.steel
+
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(if (isDomSelected) PrimaryBlue else MaterialTheme.colorScheme.surfaceVariant)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(domBg)
+                            .border(1.dp, domBorder, RoundedCornerShape(6.dp))
                             .clickable {
                                 selectedDomain = dom
                                 isRevealed = false
                             }
-                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                            .padding(horizontal = 10.dp, vertical = 5.dp)
                     ) {
                         Text(
                             text = dom.shortCode,
                             fontSize = 11.sp,
-                            fontWeight = if (isDomSelected) FontWeight.Bold else FontWeight.Normal,
-                            color = if (isDomSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                            fontWeight = if (isDomSelected) FontWeight.SemiBold else FontWeight.Normal,
+                            color = domText
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            // Progress Bar
+            // Progress Bar (thin 3dp stroke)
             LinearProgressIndicator(
                 progress = {
                     if (deck.isNotEmpty()) ((currentIndex + 1).toFloat() / deck.size).coerceIn(0f, 1f)
@@ -249,16 +257,16 @@ fun FlashcardsScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(6.dp)
-                    .clip(RoundedCornerShape(3.dp)),
-                color = PrimaryBlue,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant
+                    .height(3.dp)
+                    .clip(RoundedCornerShape(2.dp)),
+                color = MaterialTheme.calm.accentBright,
+                trackColor = MaterialTheme.calm.divider
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             if (currentCard != null) {
-                // Interactive Swipe & Flip Card
+                // Interactive Swipe & Flip Card (Flat, 8dp radius, hairline border)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -268,12 +276,12 @@ fun FlashcardsScreen(
                             rotationY = rotation
                             cameraDistance = 14f * density
                         }
-                        .clip(RoundedCornerShape(22.dp))
-                        .background(MaterialTheme.colorScheme.surface)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.calm.surface)
                         .border(
-                            1.5.dp,
-                            if (isRevealed) AccentCyan else MaterialTheme.colorScheme.outline,
-                            RoundedCornerShape(22.dp)
+                            1.dp,
+                            if (isRevealed) MaterialTheme.calm.accent else MaterialTheme.calm.divider,
+                            RoundedCornerShape(8.dp)
                         )
                         .pointerInput(currentCard.id, isRevealed) {
                             detectDragGestures(
@@ -283,7 +291,6 @@ fun FlashcardsScreen(
                                     dragOffsetX = (dragOffsetX + dragAmount.x).coerceIn(-120f, 120f)
                                 },
                                 onDragEnd = {
-                                    // If swiped up or horizontally past threshold -> trigger reveal!
                                     if (dragOffsetY < -40f || dragOffsetY > 40f || dragOffsetX < -50f || dragOffsetX > 50f) {
                                         isRevealed = !isRevealed
                                     }
@@ -297,12 +304,12 @@ fun FlashcardsScreen(
                             )
                         }
                         .clickable { isRevealed = !isRevealed }
-                        .padding(22.dp)
+                        .padding(20.dp)
                         .testTag("flashcard_body"),
                     contentAlignment = Alignment.Center
                 ) {
                     if (rotation <= 90f) {
-                        // === FRONT OF CARD: CONCEPT / QUESTION ===
+                        // FRONT OF CARD: CONCEPT / QUESTION
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -314,67 +321,68 @@ fun FlashcardsScreen(
                                 // Domain badge
                                 Box(
                                     modifier = Modifier
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(MaterialTheme.colorScheme.secondaryContainer)
-                                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(MaterialTheme.calm.surface)
+                                        .border(1.dp, MaterialTheme.calm.divider, RoundedCornerShape(6.dp))
+                                        .padding(horizontal = 10.dp, vertical = 4.dp)
                                 ) {
                                     Text(
                                         text = currentCard.domain.title,
                                         fontSize = 11.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.calm.steel
                                     )
                                 }
 
-                                Spacer(modifier = Modifier.height(16.dp))
+                                Spacer(modifier = Modifier.height(14.dp))
 
                                 Text(
                                     text = currentCard.frontTitle,
                                     fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.calm.steel
                                 )
 
                                 Spacer(modifier = Modifier.height(16.dp))
 
                                 Text(
                                     text = currentCard.frontQuestion,
-                                    fontSize = 19.sp,
-                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.SemiBold,
                                     textAlign = TextAlign.Center,
-                                    lineHeight = 28.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    lineHeight = 26.sp,
+                                    color = MaterialTheme.calm.ink
                                 )
                             }
 
                             // Swipe/Tap Reveal Indicator
                             Box(
                                 modifier = Modifier
-                                    .padding(top = 20.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                                    .border(1.dp, PrimaryBlue, RoundedCornerShape(16.dp))
-                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                                    .padding(top = 18.dp)
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(MaterialTheme.calm.surface)
+                                    .border(1.dp, MaterialTheme.calm.divider, RoundedCornerShape(6.dp))
+                                    .padding(horizontal = 14.dp, vertical = 7.dp)
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
                                         imageVector = Icons.Default.SwipeVertical,
                                         contentDescription = null,
-                                        tint = PrimaryBlue,
-                                        modifier = Modifier.size(18.dp)
+                                        tint = MaterialTheme.calm.steel,
+                                        modifier = Modifier.size(16.dp)
                                     )
-                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
                                     Text(
                                         text = "Swipe to reveal answer ↺",
                                         fontSize = 13.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = PrimaryBlue
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.calm.steel
                                     )
                                 }
                             }
                         }
                     } else {
-                        // === BACK OF CARD: DETAILED EXPLANATION & FORMULAS ===
+                        // BACK OF CARD: DETAILED EXPLANATION & FORMULAS
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -386,15 +394,16 @@ fun FlashcardsScreen(
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Box(
                                     modifier = Modifier
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(CorrectBadgeBg)
-                                        .padding(horizontal = 12.dp, vertical = 4.dp)
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(MaterialTheme.calm.goContainer)
+                                        .border(1.dp, MaterialTheme.calm.go.copy(alpha = 0.4f), RoundedCornerShape(6.dp))
+                                        .padding(horizontal = 10.dp, vertical = 4.dp)
                                 ) {
                                     Text(
                                         text = "Answer & Solution",
                                         fontSize = 12.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = CorrectBadgeText
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.calm.go
                                     )
                                 }
 
@@ -405,23 +414,24 @@ fun FlashcardsScreen(
                                     fontSize = 15.sp,
                                     lineHeight = 22.sp,
                                     textAlign = TextAlign.Start,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = MaterialTheme.calm.ink
                                 )
 
                                 if (currentCard.formula != null) {
-                                    Spacer(modifier = Modifier.height(14.dp))
+                                    Spacer(modifier = Modifier.height(12.dp))
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .clip(RoundedCornerShape(10.dp))
-                                            .background(MaterialTheme.colorScheme.secondaryContainer)
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(MaterialTheme.calm.accentContainer)
+                                            .border(1.dp, MaterialTheme.calm.accent.copy(alpha = 0.2f), RoundedCornerShape(6.dp))
                                             .padding(horizontal = 12.dp, vertical = 8.dp)
                                     ) {
                                         Text(
                                             text = currentCard.formula,
                                             fontSize = 13.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = MaterialTheme.calm.accentBright
                                         )
                                     }
                                 }
@@ -431,29 +441,30 @@ fun FlashcardsScreen(
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .background(AccentAmber.copy(alpha = 0.15f))
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(MaterialTheme.calm.surface)
+                                            .border(1.dp, MaterialTheme.calm.divider, RoundedCornerShape(6.dp))
                                             .padding(8.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Lightbulb,
                                             contentDescription = null,
-                                            tint = AccentAmber,
+                                            tint = MaterialTheme.calm.steel,
                                             modifier = Modifier.size(16.dp)
                                         )
                                         Spacer(modifier = Modifier.width(6.dp))
                                         Text(
                                             text = currentCard.memoryTrick,
                                             fontSize = 12.sp,
-                                            color = AccentAmber,
-                                            fontWeight = FontWeight.Medium
+                                            color = MaterialTheme.calm.steel,
+                                            fontWeight = FontWeight.Normal
                                         )
                                     }
                                 }
                             }
 
-                            // Rating actions on back
+                            // Rating actions on back (Muted Go & Warn)
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -470,11 +481,16 @@ fun FlashcardsScreen(
                                             onBack()
                                         }
                                     },
-                                    colors = ButtonDefaults.buttonColors(containerColor = IncorrectBadgeBg),
-                                    shape = RoundedCornerShape(16.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.calm.warnContainer,
+                                        contentColor = MaterialTheme.calm.warn
+                                    ),
+                                    elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp),
+                                    shape = RoundedCornerShape(8.dp),
+                                    border = BorderStroke(1.dp, MaterialTheme.calm.warn.copy(alpha = 0.3f)),
                                     modifier = Modifier.weight(1f)
                                 ) {
-                                    Text("❌ Review again", color = IncorrectBadgeText, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                                    Text("✕ Review again", color = MaterialTheme.calm.warn, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                                 }
 
                                 Button(
@@ -487,11 +503,16 @@ fun FlashcardsScreen(
                                             onBack()
                                         }
                                     },
-                                    colors = ButtonDefaults.buttonColors(containerColor = CorrectBadgeBg),
-                                    shape = RoundedCornerShape(16.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.calm.goContainer,
+                                        contentColor = MaterialTheme.calm.go
+                                    ),
+                                    elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp),
+                                    shape = RoundedCornerShape(8.dp),
+                                    border = BorderStroke(1.dp, MaterialTheme.calm.go.copy(alpha = 0.3f)),
                                     modifier = Modifier.weight(1f)
                                 ) {
-                                    Text("✅ Mastered", color = CorrectBadgeText, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                                    Text("✓ Mastered", color = MaterialTheme.calm.go, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                                 }
                             }
                         }
@@ -499,11 +520,11 @@ fun FlashcardsScreen(
                 }
             } else {
                 Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                    Text("No cards in this domain.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("No cards in this domain.", color = MaterialTheme.calm.steel)
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Navigation Controls
             Row(
@@ -519,8 +540,13 @@ fun FlashcardsScreen(
                         }
                     },
                     enabled = currentIndex > 0,
-                    shape = RoundedCornerShape(20.dp),
-                    modifier = Modifier.size(width = 110.dp, height = 48.dp)
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.calm.divider),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.calm.ink,
+                        disabledContentColor = MaterialTheme.calm.steel.copy(alpha = 0.4f)
+                    ),
+                    modifier = Modifier.size(width = 110.dp, height = 46.dp)
                 ) {
                     Text("Previous")
                 }
@@ -528,14 +554,15 @@ fun FlashcardsScreen(
                 IconButton(
                     onClick = { isRevealed = !isRevealed },
                     modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .size(44.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.calm.surface)
+                        .border(1.dp, MaterialTheme.calm.divider, RoundedCornerShape(8.dp))
                 ) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
                         contentDescription = "Flip",
-                        tint = PrimaryBlue
+                        tint = MaterialTheme.calm.steel
                     )
                 }
 
@@ -548,9 +575,13 @@ fun FlashcardsScreen(
                             onBack()
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
-                    shape = RoundedCornerShape(20.dp),
-                    modifier = Modifier.size(width = 110.dp, height = 48.dp)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.calm.accent,
+                        contentColor = Color.White
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.size(width = 110.dp, height = 46.dp)
                 ) {
                     Text(if (currentIndex < deck.size - 1) "Next" else "Done", color = Color.White)
                 }

@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,21 +19,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Architecture
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Brightness4
-import androidx.compose.material.icons.filled.Brightness7
 import androidx.compose.material.icons.filled.BrightnessAuto
 import androidx.compose.material.icons.filled.Calculate
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Construction
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.GridOn
 import androidx.compose.material.icons.filled.Leaderboard
@@ -42,7 +37,6 @@ import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.SatelliteAlt
-import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Style
 import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material.icons.filled.Timer
@@ -52,6 +46,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -69,7 +64,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
@@ -83,13 +77,8 @@ import com.example.model.DomainStat
 import com.example.model.FsDomain
 import com.example.model.LeaderboardUser
 import com.example.model.UserProgress
-import com.example.ui.theme.AccentAmber
-import com.example.ui.theme.AccentCyan
-import com.example.ui.theme.CorrectBadgeBg
-import com.example.ui.theme.CorrectBadgeText
-import com.example.ui.theme.IncorrectBadgeBg
-import com.example.ui.theme.IncorrectBadgeText
-import com.example.ui.theme.PrimaryBlue
+import com.example.ui.theme.TabularNumStyle
+import com.example.ui.theme.calm
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -102,17 +91,17 @@ fun HomeScreen(
     domainStats: Map<FsDomain, DomainStat>,
     achievements: List<Achievement>,
     leaderboard: List<LeaderboardUser>,
-    currentThemeMode: AppThemeMode = AppThemeMode.SYSTEM,
-    onSelectThemeMode: (AppThemeMode) -> Unit = {},
+    currentThemeMode: AppThemeMode,
+    onSelectThemeMode: (AppThemeMode) -> Unit,
     onStartDomainQuiz: (FsDomain) -> Unit,
-    onStartAdaptiveQuiz: () -> Unit,
-    onStartMockExam: () -> Unit,
     onOpenQuizConfig: () -> Unit,
-    onReviewModule: (CompletedModule) -> Unit,
-    onOpenFlashcards: () -> Unit,
+    onStartMockExam: () -> Unit,
+    onStartAdaptiveQuiz: () -> Unit,
     onOpenStudyGuide: () -> Unit,
+    onOpenFlashcards: () -> Unit,
     onOpenAchievements: () -> Unit,
-    onOpenLeaderboard: () -> Unit
+    onOpenLeaderboard: () -> Unit,
+    onReviewModule: (CompletedModule) -> Unit
 ) {
     var domainFilter by remember { mutableStateOf("All") }
     var showThemeDialog by remember { mutableStateOf(false) }
@@ -121,13 +110,14 @@ fun HomeScreen(
     val myLeaderboardEntry = remember(leaderboard) { leaderboard.find { it.isCurrentUser } }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = MaterialTheme.calm.bg,
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onOpenQuizConfig,
-                containerColor = PrimaryBlue,
+                containerColor = MaterialTheme.calm.accent,
                 contentColor = Color.White,
-                shape = CircleShape,
+                shape = RoundedCornerShape(8.dp),
+                elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
                 modifier = Modifier
                     .padding(bottom = 16.dp)
                     .testTag("fab_start_practice")
@@ -139,13 +129,15 @@ fun HomeScreen(
                     Icon(
                         imageVector = Icons.Default.PlayArrow,
                         contentDescription = "Start Practice",
-                        modifier = Modifier.size(24.dp)
+                        tint = Color.White,
+                        modifier = Modifier.size(22.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Practice",
                         fontWeight = FontWeight.SemiBold,
-                        fontSize = 15.sp
+                        fontSize = 15.sp,
+                        color = Color.White
                     )
                 }
             }
@@ -156,11 +148,11 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
                 Spacer(modifier = Modifier.height(10.dp))
-                // Top Header Row with Theme Selector & Streak Tracker
+                // Top Header Row with Theme Selector & Muted Streak Tracker
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -171,12 +163,12 @@ fun HomeScreen(
                             text = "NCEES FS Exam Prep",
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onBackground
+                            color = MaterialTheme.calm.ink
                         )
                         Text(
                             text = "Fundamentals of Surveying",
                             fontSize = 13.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.calm.steel
                         )
                     }
 
@@ -185,9 +177,10 @@ fun HomeScreen(
                         IconButton(
                             onClick = { showThemeDialog = true },
                             modifier = Modifier
-                                .size(38.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                                .size(36.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(MaterialTheme.calm.surface)
+                                .border(1.dp, MaterialTheme.calm.divider, RoundedCornerShape(6.dp))
                                 .testTag("theme_selector_btn")
                         ) {
                             Icon(
@@ -197,35 +190,37 @@ fun HomeScreen(
                                     AppThemeMode.DARK -> Icons.Default.DarkMode
                                 },
                                 contentDescription = "Change appearance",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(20.dp)
+                                tint = MaterialTheme.calm.steel,
+                                modifier = Modifier.size(18.dp)
                             )
                         }
 
                         Spacer(modifier = Modifier.width(8.dp))
 
-                        // Streak Tracker Pill
+                        // Streak Tracker Pill — Muted line-style
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(Color(0xFF2E1C0C))
-                                .border(1.dp, Color(0xFFF97316), RoundedCornerShape(20.dp))
-                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(MaterialTheme.calm.surface)
+                                .border(1.dp, MaterialTheme.calm.divider, RoundedCornerShape(6.dp))
+                                .padding(horizontal = 10.dp, vertical = 6.dp)
                                 .testTag("streak_tracker_pill")
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     imageVector = Icons.Default.LocalFireDepartment,
                                     contentDescription = "Streak",
-                                    tint = AccentAmber,
-                                    modifier = Modifier.size(18.dp)
+                                    tint = MaterialTheme.calm.steel,
+                                    modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
                                     text = "${userProgress.streakDays}d Streak",
-                                    color = AccentAmber,
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Bold
+                                    style = TabularNumStyle.copy(
+                                        color = MaterialTheme.calm.ink,
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
                                 )
                             }
                         }
@@ -233,17 +228,18 @@ fun HomeScreen(
                 }
             }
 
-            // Daily Target & Overall Progress Hero Card
+            // Daily Target & Overall Progress Hero Card (Flat, hairline border)
             item {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("progress_card"),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                    shape = RoundedCornerShape(8.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.calm.surface),
+                    border = BorderStroke(1.dp, MaterialTheme.calm.divider),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
+                    Column(modifier = Modifier.padding(18.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -253,29 +249,32 @@ fun HomeScreen(
                                 text = "Daily Goal Progress",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = MaterialTheme.calm.ink
                             )
                             Text(
                                 text = "${userProgress.questionsAnsweredToday}/${userProgress.dailyGoalTarget} questions",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = PrimaryBlue
+                                style = TabularNumStyle.copy(
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.calm.accentBright
+                                )
                             )
                         }
 
                         Spacer(modifier = Modifier.height(10.dp))
 
+                        // Thin progress bar (4dp stroke)
                         LinearProgressIndicator(
                             progress = { userProgress.dailyProgressFraction },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(8.dp)
-                                .clip(RoundedCornerShape(4.dp)),
-                            color = PrimaryBlue,
-                            trackColor = MaterialTheme.colorScheme.surfaceVariant
+                                .height(4.dp)
+                                .clip(RoundedCornerShape(2.dp)),
+                            color = MaterialTheme.calm.accentBright,
+                            trackColor = MaterialTheme.calm.divider
                         )
 
-                        Spacer(modifier = Modifier.height(18.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -303,7 +302,7 @@ fun HomeScreen(
                 }
             }
 
-            // Gamification Bar: Badges & Leaderboard
+            // Gamification Bar: Badges & Leaderboard (Muted line-style rows, zero bright rewards)
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -312,32 +311,34 @@ fun HomeScreen(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(AccentAmber.copy(alpha = 0.12f))
-                            .border(1.dp, Color(0xFFD97706), RoundedCornerShape(16.dp))
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.calm.surface)
+                            .border(1.dp, MaterialTheme.calm.divider, RoundedCornerShape(8.dp))
                             .clickable { onOpenAchievements() }
-                            .padding(14.dp)
+                            .padding(12.dp)
                             .testTag("home_achievements_card")
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Default.EmojiEvents,
                                 contentDescription = null,
-                                tint = AccentAmber,
-                                modifier = Modifier.size(24.dp)
+                                tint = MaterialTheme.calm.steel,
+                                modifier = Modifier.size(20.dp)
                             )
                             Spacer(modifier = Modifier.width(10.dp))
                             Column {
                                 Text(
                                     text = "Badges",
                                     fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.calm.ink
                                 )
                                 Text(
                                     text = "$unlockedBadges/${achievements.size} Unlocked",
-                                    fontSize = 11.sp,
-                                    color = AccentAmber
+                                    style = TabularNumStyle.copy(
+                                        fontSize = 12.sp,
+                                        color = MaterialTheme.calm.steel
+                                    )
                                 )
                             }
                         }
@@ -346,32 +347,34 @@ fun HomeScreen(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(PrimaryBlue.copy(alpha = 0.12f))
-                            .border(1.dp, PrimaryBlue, RoundedCornerShape(16.dp))
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.calm.surface)
+                            .border(1.dp, MaterialTheme.calm.divider, RoundedCornerShape(8.dp))
                             .clickable { onOpenLeaderboard() }
-                            .padding(14.dp)
+                            .padding(12.dp)
                             .testTag("home_leaderboard_card")
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Default.Leaderboard,
                                 contentDescription = null,
-                                tint = PrimaryBlue,
-                                modifier = Modifier.size(24.dp)
+                                tint = MaterialTheme.calm.steel,
+                                modifier = Modifier.size(20.dp)
                             )
                             Spacer(modifier = Modifier.width(10.dp))
                             Column {
                                 Text(
                                     text = "Leaderboard",
                                     fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.calm.ink
                                 )
                                 Text(
                                     text = if (myLeaderboardEntry != null) "Rank #${myLeaderboardEntry.rank}" else "Rank #4",
-                                    fontSize = 11.sp,
-                                    color = PrimaryBlue
+                                    style = TabularNumStyle.copy(
+                                        fontSize = 12.sp,
+                                        color = MaterialTheme.calm.steel
+                                    )
                                 )
                             }
                         }
@@ -383,7 +386,7 @@ fun HomeScreen(
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     QuickToolCard(
                         title = "Flashcard Mode",
@@ -393,6 +396,7 @@ fun HomeScreen(
                         onClick = onOpenFlashcards,
                         testTag = "home_flashcards_btn"
                     )
+
                     QuickToolCard(
                         title = "Study Guide",
                         subtitle = "Key exam cheat-sheet",
@@ -404,19 +408,15 @@ fun HomeScreen(
                 }
             }
 
-            // Mock Exam Mode Hero Card
+            // Mock Exam Mode Hero Card (Flat, solid surface, no gradients)
             item {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(
-                            Brush.linearGradient(
-                                colors = listOf(Color(0xFF0F1E36), Color(0xFF1E3A8A))
-                            )
-                        )
-                        .border(1.dp, PrimaryBlue, RoundedCornerShape(20.dp))
-                        .padding(20.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.calm.surface)
+                        .border(1.dp, MaterialTheme.calm.divider, RoundedCornerShape(8.dp))
+                        .padding(18.dp)
                         .testTag("mock_exam_card")
                 ) {
                     Column {
@@ -427,71 +427,77 @@ fun HomeScreen(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(Color(0xFF2563EB))
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(MaterialTheme.calm.accentContainer)
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
                                         imageVector = Icons.Default.Timer,
                                         contentDescription = null,
-                                        tint = Color.White,
+                                        tint = MaterialTheme.calm.accentBright,
                                         modifier = Modifier.size(12.dp)
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text(
                                         text = "FULL CBT SIMULATION",
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.White
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.calm.accentBright
                                     )
                                 }
                             }
 
                             Text(
                                 text = "Timed 90m",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = AccentCyan
+                                style = TabularNumStyle.copy(
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.calm.steel
+                                )
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
                         Text(
                             text = "Full-Length NCEES FS Mock Exam",
                             fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.calm.ink
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "32 exam questions covering all 8 domains per official specifications. Includes live countdown timer, question palette, flagging, and domain diagnostic report.",
-                            fontSize = 13.sp,
-                            lineHeight = 18.sp,
-                            color = Color(0xFFCBD5E1)
+                            fontSize = 14.sp,
+                            lineHeight = 20.sp,
+                            color = MaterialTheme.calm.steel
                         )
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(14.dp))
 
                         Button(
                             onClick = onStartMockExam,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                            shape = RoundedCornerShape(20.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.calm.accent,
+                                contentColor = Color.White
+                            ),
+                            elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp),
+                            shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.testTag("btn_launch_mock_exam")
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     imageVector = Icons.Default.PlayArrow,
                                     contentDescription = null,
-                                    tint = PrimaryBlue,
+                                    tint = Color.White,
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     text = "Start Mock Exam",
-                                    color = PrimaryBlue,
-                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.SemiBold,
                                     fontSize = 14.sp
                                 )
                             }
@@ -505,9 +511,9 @@ fun HomeScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(18.dp))
-                        .background(MaterialTheme.colorScheme.surface)
-                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(18.dp))
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.calm.surface)
+                        .border(1.dp, MaterialTheme.calm.divider, RoundedCornerShape(8.dp))
                         .padding(18.dp)
                         .testTag("adaptive_learning_card")
                 ) {
@@ -516,40 +522,40 @@ fun HomeScreen(
                             Icon(
                                 imageVector = Icons.Default.AutoAwesome,
                                 contentDescription = null,
-                                tint = PrimaryBlue,
-                                modifier = Modifier.size(20.dp)
+                                tint = MaterialTheme.calm.steel,
+                                modifier = Modifier.size(18.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "Adaptive Learning System",
                                 fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.calm.ink
                             )
                         }
-
                         Spacer(modifier = Modifier.height(6.dp))
-
                         Text(
                             text = "Dynamically adjusts question difficulty and domain focus based on your weak areas while advancing curve geometry.",
-                            fontSize = 13.sp,
-                            lineHeight = 18.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            fontSize = 14.sp,
+                            lineHeight = 20.sp,
+                            color = MaterialTheme.calm.steel
                         )
-
                         Spacer(modifier = Modifier.height(12.dp))
-
                         Button(
                             onClick = onStartAdaptiveQuiz,
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.calm.accent,
+                                contentColor = Color.White
+                            ),
+                            elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp),
+                            shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.testTag("btn_launch_adaptive_drill")
                         ) {
                             Text(
                                 text = "Start Adaptive Practice (10 Qs)",
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                color = Color.White,
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 13.sp
+                                fontSize = 14.sp
                             )
                         }
                     }
@@ -569,12 +575,12 @@ fun HomeScreen(
                                 text = "Exam Domains",
                                 fontSize = 19.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onBackground
+                                color = MaterialTheme.calm.ink
                             )
                             Text(
                                 text = "Select a specific domain to answer practice questions",
-                                fontSize = 13.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                fontSize = 14.sp,
+                                color = MaterialTheme.calm.steel
                             )
                         }
                     }
@@ -584,10 +590,15 @@ fun HomeScreen(
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf("All", "Strengths", "Needs Work").forEach { filter ->
                             val isSelected = domainFilter == filter
+                            val chipBg = if (isSelected) MaterialTheme.calm.accentContainer else MaterialTheme.calm.surface
+                            val chipBorder = if (isSelected) MaterialTheme.calm.accent else MaterialTheme.calm.divider
+                            val chipText = if (isSelected) MaterialTheme.calm.accentBright else MaterialTheme.calm.steel
+
                             Box(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(if (isSelected) PrimaryBlue else MaterialTheme.colorScheme.surfaceVariant)
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(chipBg)
+                                    .border(1.dp, chipBorder, RoundedCornerShape(6.dp))
                                     .clickable { domainFilter = filter }
                                     .padding(horizontal = 14.dp, vertical = 7.dp)
                             ) {
@@ -595,7 +606,7 @@ fun HomeScreen(
                                     text = filter,
                                     fontSize = 13.sp,
                                     fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                    color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = chipText
                                 )
                             }
                         }
@@ -603,7 +614,7 @@ fun HomeScreen(
                 }
             }
 
-            // Filtered Domain Cards
+            // Filtered Domain Cards (Flat surface rows separated by hairline dividers)
             val filteredDomains = FsDomain.entries.filter { domain ->
                 val stat = domainStats[domain] ?: DomainStat(domain)
                 when (domainFilter) {
@@ -630,12 +641,12 @@ fun HomeScreen(
                         text = "Completed Practice Modules",
                         fontSize = 19.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.calm.ink
                     )
                     Text(
                         text = "Review answers, explanations, and score breakdowns",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        fontSize = 14.sp,
+                        color = MaterialTheme.calm.steel
                     )
                 }
             }
@@ -645,14 +656,15 @@ fun HomeScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(MaterialTheme.colorScheme.surface)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.calm.surface)
+                            .border(1.dp, MaterialTheme.calm.divider, RoundedCornerShape(8.dp))
                             .padding(24.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = "No completed modules yet. Start your first quiz below!",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = MaterialTheme.calm.steel,
                             fontSize = 14.sp
                         )
                     }
@@ -680,7 +692,7 @@ fun HomeScreen(
                 Text(
                     text = "Appearance Theme",
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.calm.ink
                 )
             },
             text = {
@@ -688,17 +700,21 @@ fun HomeScreen(
                     Text(
                         text = "Choose your preferred color theme:",
                         fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.calm.steel
                     )
                     Spacer(modifier = Modifier.height(6.dp))
 
                     AppThemeMode.entries.forEach { mode ->
                         val isSelected = currentThemeMode == mode
+                        val itemBg = if (isSelected) MaterialTheme.calm.accentContainer else MaterialTheme.calm.surface
+                        val itemBorder = if (isSelected) MaterialTheme.calm.accent else MaterialTheme.calm.divider
+
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(itemBg)
+                                .border(1.dp, itemBorder, RoundedCornerShape(6.dp))
                                 .clickable {
                                     onSelectThemeMode(mode)
                                     showThemeDialog = false
@@ -712,7 +728,10 @@ fun HomeScreen(
                                     onSelectThemeMode(mode)
                                     showThemeDialog = false
                                 },
-                                colors = RadioButtonDefaults.colors(selectedColor = PrimaryBlue)
+                                colors = RadioButtonDefaults.colors(
+                                    selectedColor = MaterialTheme.calm.accent,
+                                    unselectedColor = MaterialTheme.calm.steel
+                                )
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Column {
@@ -720,12 +739,12 @@ fun HomeScreen(
                                     text = mode.title,
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+                                    color = if (isSelected) MaterialTheme.calm.accentBright else MaterialTheme.calm.ink
                                 )
                                 Text(
                                     text = mode.subtitle,
                                     fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.calm.steel
                                 )
                             }
                         }
@@ -734,10 +753,11 @@ fun HomeScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showThemeDialog = false }) {
-                    Text("Done")
+                    Text("Done", color = MaterialTheme.calm.accentBright)
                 }
             },
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.calm.surface,
+            shape = RoundedCornerShape(8.dp)
         )
     }
 }
@@ -750,23 +770,26 @@ private fun StatBox(
 ) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .clip(RoundedCornerShape(6.dp))
+            .background(MaterialTheme.calm.surface)
+            .border(1.dp, MaterialTheme.calm.divider, RoundedCornerShape(6.dp))
             .padding(vertical = 10.dp, horizontal = 8.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = value,
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
+                style = TabularNumStyle.copy(
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.calm.ink
+                )
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = label,
-                fontSize = 11.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                fontSize = 12.sp,
+                color = MaterialTheme.calm.steel
             )
         }
     }
@@ -783,40 +806,40 @@ private fun QuickToolCard(
 ) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.calm.surface)
+            .border(1.dp, MaterialTheme.calm.divider, RoundedCornerShape(8.dp))
             .clickable { onClick() }
-            .padding(14.dp)
+            .padding(12.dp)
             .testTag(testTag)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer),
+                    .size(36.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(MaterialTheme.calm.accentContainer),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.size(20.dp)
+                    tint = MaterialTheme.calm.accentBright,
+                    modifier = Modifier.size(18.dp)
                 )
             }
             Spacer(modifier = Modifier.width(10.dp))
             Column {
                 Text(
                     text = title,
-                    fontSize = 15.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.calm.ink
                 )
                 Text(
                     text = subtitle,
-                    fontSize = 11.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    fontSize = 12.sp,
+                    color = MaterialTheme.calm.steel
                 )
             }
         }
@@ -843,9 +866,9 @@ private fun DomainCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.calm.surface)
+            .border(1.dp, MaterialTheme.calm.divider, RoundedCornerShape(8.dp))
             .clickable { onStartQuiz() }
             .padding(16.dp)
             .testTag("domain_card_${domain.shortCode.lowercase()}")
@@ -857,61 +880,58 @@ private fun DomainCard(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(42.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                        .size(38.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(MaterialTheme.calm.accentContainer),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = PrimaryBlue,
-                        modifier = Modifier.size(22.dp)
+                        tint = MaterialTheme.calm.accentBright,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
-
                 Spacer(modifier = Modifier.width(12.dp))
-
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = domain.title,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.calm.ink
                     )
                     Text(
                         text = "${domain.targetExamQuestions} on exam",
                         fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.calm.steel
                     )
                 }
-
                 if (stat.isStrength) {
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(CorrectBadgeBg)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(MaterialTheme.calm.goContainer)
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {
                         Text(
                             text = "Strength",
                             fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = CorrectBadgeText
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.calm.go
                         )
                     }
                 } else if (stat.isNeedsWork) {
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(IncorrectBadgeBg)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(MaterialTheme.calm.warnContainer)
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {
                         Text(
                             text = "Needs Work",
                             fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = IncorrectBadgeText
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.calm.warn
                         )
                     }
                 }
@@ -927,14 +947,16 @@ private fun DomainCard(
             ) {
                 Text(
                     text = if (stat.attempted > 0) "Accuracy: $accuracy% (${stat.correct}/${stat.attempted})" else "Not tested yet",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = TabularNumStyle.copy(
+                        fontSize = 12.sp,
+                        color = MaterialTheme.calm.steel
+                    )
                 )
                 Text(
                     text = "Practice ›",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = PrimaryBlue
+                    color = MaterialTheme.calm.accentBright
                 )
             }
 
@@ -944,14 +966,14 @@ private fun DomainCard(
                 progress = { (accuracy.toFloat() / 100f).coerceIn(0f, 1f) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(5.dp)
-                    .clip(RoundedCornerShape(3.dp)),
+                    .height(3.dp)
+                    .clip(RoundedCornerShape(2.dp)),
                 color = when {
-                    accuracy >= 70 -> Color(0xFF22C55E)
-                    accuracy >= 50 -> Color(0xFFF59E0B)
-                    else -> Color(0xFFEF4444)
+                    accuracy >= 70 -> MaterialTheme.calm.go
+                    accuracy >= 50 -> MaterialTheme.calm.accentBright
+                    else -> MaterialTheme.calm.warn
                 },
-                trackColor = MaterialTheme.colorScheme.surfaceVariant
+                trackColor = MaterialTheme.calm.divider
             )
         }
     }
@@ -970,11 +992,11 @@ private fun CompletedModuleCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.calm.surface)
+            .border(1.dp, MaterialTheme.calm.divider, RoundedCornerShape(8.dp))
             .clickable { onReview() }
-            .padding(16.dp)
+            .padding(14.dp)
             .testTag("completed_module_${module.id}")
     ) {
         Row(
@@ -987,32 +1009,36 @@ private fun CompletedModuleCard(
                     text = module.title,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.calm.ink
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "$dateStr • ${module.totalQuestions} questions",
                     fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.calm.steel
                 )
             }
 
             Spacer(modifier = Modifier.width(12.dp))
 
             Column(horizontalAlignment = Alignment.End) {
+                val isPassing = module.percentage >= 70
+                val badgeBg = if (isPassing) MaterialTheme.calm.goContainer else MaterialTheme.calm.warnContainer
+                val badgeText = if (isPassing) MaterialTheme.calm.go else MaterialTheme.calm.warn
+
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(
-                            if (module.percentage >= 70) CorrectBadgeBg else IncorrectBadgeBg
-                        )
-                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(badgeBg)
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Text(
                         text = "${module.correctCount}/${module.totalQuestions} (${module.percentage}%)",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (module.percentage >= 70) CorrectBadgeText else IncorrectBadgeText
+                        style = TabularNumStyle.copy(
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = badgeText
+                        )
                     )
                 }
 
@@ -1022,7 +1048,7 @@ private fun CompletedModuleCard(
                     text = "Review ›",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = PrimaryBlue
+                    color = MaterialTheme.calm.accentBright
                 )
             }
         }

@@ -19,15 +19,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ui.theme.AccentCyan
-import com.example.ui.theme.PrimaryBlueLight
+import com.example.ui.theme.TabularNumStyle
+import com.example.ui.theme.calm
 
 @Composable
 fun ArcScoreGauge(
@@ -45,23 +43,25 @@ fun ArcScoreGauge(
     LaunchedEffect(progressFraction) {
         animatedProgress.animateTo(
             targetValue = progressFraction,
-            animationSpec = tween(durationMillis = 900)
+            animationSpec = tween(durationMillis = 800)
         )
     }
 
-    val trackColor = MaterialTheme.colorScheme.surfaceVariant
+    val trackColor = MaterialTheme.calm.divider
+    val activeColor = MaterialTheme.calm.accentBright
+    val warnColor = MaterialTheme.calm.warn
 
     Column(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
-            modifier = Modifier
-                .size(width = 240.dp, height = 135.dp),
+            modifier = Modifier.size(width = 220.dp, height = 125.dp),
             contentAlignment = Alignment.BottomCenter
         ) {
-            Canvas(modifier = Modifier.size(width = 240.dp, height = 135.dp)) {
-                val strokeWidth = 14.dp.toPx()
+            Canvas(modifier = Modifier.size(width = 220.dp, height = 125.dp)) {
+                // Thin stroke (4dp) per Calm Pro guidelines
+                val strokeWidth = 4.dp.toPx()
                 val diameter = size.width - strokeWidth
                 val arcSize = Size(diameter, diameter)
                 val topLeft = Offset(strokeWidth / 2f, strokeWidth / 2f)
@@ -77,12 +77,12 @@ fun ArcScoreGauge(
                     style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
                 )
 
-                // If there are incorrect answers, draw trailing red accent on the remaining portion
+                // Optional subtle trailing incorrect arc
                 if (totalCount > 0 && incorrectCount > 0) {
                     val remainingAngle = 180f * (1f - animatedProgress.value)
                     val startAngle = 180f + (180f * animatedProgress.value)
                     drawArc(
-                        color = Color(0xFFE28B93),
+                        color = warnColor.copy(alpha = 0.5f),
                         startAngle = startAngle,
                         sweepAngle = remainingAngle,
                         useCenter = false,
@@ -92,14 +92,11 @@ fun ArcScoreGauge(
                     )
                 }
 
-                // Foreground active arc with gradient (Cyan to Blue)
+                // Foreground active arc with solid accent token (no decorative gradients)
                 val activeSweep = 180f * animatedProgress.value
                 if (activeSweep > 0f) {
-                    val gradient = Brush.horizontalGradient(
-                        colors = listOf(AccentCyan, PrimaryBlueLight)
-                    )
                     drawArc(
-                        brush = gradient,
+                        color = activeColor,
                         startAngle = 180f,
                         sweepAngle = activeSweep,
                         useCenter = false,
@@ -113,18 +110,20 @@ fun ArcScoreGauge(
             // Center Numbers & Label
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier.padding(bottom = 6.dp)
             ) {
                 Text(
                     text = "$correctCount/$totalCount",
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
+                    style = TabularNumStyle.copy(
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
                 )
                 Text(
                     text = "Correct",
                     fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.calm.steel
                 )
             }
         }
@@ -134,8 +133,10 @@ fun ArcScoreGauge(
         // Subtext: "0 skipped • 10 incorrect"
         Text(
             text = "$skippedCount skipped • $incorrectCount incorrect",
-            fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            style = TabularNumStyle.copy(
+                fontSize = 14.sp,
+                color = MaterialTheme.calm.steel
+            )
         )
     }
 }

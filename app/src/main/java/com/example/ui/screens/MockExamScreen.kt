@@ -1,6 +1,7 @@
 package com.example.ui.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,12 +19,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.GridView
@@ -39,7 +37,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -62,9 +59,8 @@ import androidx.compose.ui.unit.sp
 import com.example.model.FsDomain
 import com.example.model.MockExamResult
 import com.example.model.Question
-import com.example.ui.theme.AccentAmber
-import com.example.ui.theme.AccentCyan
-import com.example.ui.theme.PrimaryBlue
+import com.example.ui.theme.TabularNumStyle
+import com.example.ui.theme.calm
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -72,51 +68,47 @@ import kotlinx.coroutines.delay
 fun MockExamScreen(
     questions: List<Question>,
     timeLimitMinutes: Int = 90,
-    onSubmitExam: (result: MockExamResult) -> Unit,
+    onSubmitExam: (MockExamResult) -> Unit,
     onCancelExam: () -> Unit
 ) {
-    if (questions.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("No exam questions loaded", color = MaterialTheme.colorScheme.onBackground)
-        }
-        return
+    BackHandler {
+        // Trigger quit confirmation instead of immediate back
     }
 
     var currentIndex by remember { mutableIntStateOf(0) }
     val userAnswers = remember { mutableStateMapOf<String, Int>() }
     val flaggedQuestionIds = remember { mutableStateOf(setOf<String>()) }
+
     var remainingSeconds by remember { mutableIntStateOf(timeLimitMinutes * 60) }
     var isTimerRunning by remember { mutableStateOf(true) }
 
-    var showSubmitDialog by remember { mutableStateOf(false) }
     var showPaletteSheet by remember { mutableStateOf(false) }
-    var showExitDialog by remember { mutableStateOf(false) }
-
     val paletteSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    // Countdown Timer Loop
+    var showSubmitDialog by remember { mutableStateOf(false) }
+    var showExitDialog by remember { mutableStateOf(false) }
+
+    // Countdown Timer Coroutine
     LaunchedEffect(isTimerRunning) {
         while (isTimerRunning && remainingSeconds > 0) {
-            delay(1000L)
+            delay(1000)
             remainingSeconds--
             if (remainingSeconds <= 0) {
-                // Auto-submit on time expiration
                 isTimerRunning = false
-                showSubmitDialog = false
-                submitExamInternal(questions, userAnswers, flaggedQuestionIds.value, timeLimitMinutes * 60, onSubmitExam)
+                val timeSpent = (timeLimitMinutes * 60) - remainingSeconds
+                submitExamInternal(questions, userAnswers, flaggedQuestionIds.value, timeSpent, onSubmitExam)
             }
         }
     }
 
-    BackHandler {
-        showExitDialog = true
-    }
-
     val currentQuestion = questions.getOrElse(currentIndex) { questions.first() }
-    val isFlagged = flaggedQuestionIds.value.contains(currentQuestion.id)
     val selectedOption = userAnswers[currentQuestion.id]
+    val isFlagged = flaggedQuestionIds.value.contains(currentQuestion.id)
 
-    // Formatted Time String HH:MM:SS
+    val answeredCount = userAnswers.size
+    val flaggedCount = flaggedQuestionIds.value.size
+    val unansweredCount = questions.size - answeredCount
+
     val timeFormatted = remember(remainingSeconds) {
         val hours = remainingSeconds / 3600
         val mins = (remainingSeconds % 3600) / 60
@@ -129,12 +121,12 @@ fun MockExamScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = MaterialTheme.calm.bg,
         topBar = {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFF16181D))
+                    .background(MaterialTheme.calm.surface)
                     .padding(horizontal = 16.dp, vertical = 10.dp)
             ) {
                 Row(
@@ -152,36 +144,39 @@ fun MockExamScreen(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Exit Exam",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = MaterialTheme.calm.steel
                         )
                     }
 
-                    // Timer Pill
+                    // Timer Pill (Muted container, tabular figures)
+                    val isUrgent = remainingSeconds < 300
+                    val timerBg = if (isUrgent) MaterialTheme.calm.warnContainer else MaterialTheme.calm.surface
+                    val timerBorder = if (isUrgent) MaterialTheme.calm.warn else MaterialTheme.calm.divider
+                    val timerColor = if (isUrgent) MaterialTheme.calm.warn else MaterialTheme.calm.ink
+
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(if (remainingSeconds < 300) Color(0xFF3B151A) else Color(0xFF1E2638))
-                            .border(
-                                1.dp,
-                                if (remainingSeconds < 300) Color(0xFFEF4444) else Color(0xFF3B82F6),
-                                RoundedCornerShape(16.dp)
-                            )
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(timerBg)
+                            .border(1.dp, timerBorder, RoundedCornerShape(6.dp))
+                            .padding(horizontal = 12.dp, vertical = 5.dp)
                             .testTag("exam_timer_display")
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Default.Timer,
                                 contentDescription = null,
-                                tint = if (remainingSeconds < 300) Color(0xFFF87171) else AccentCyan,
-                                modifier = Modifier.size(16.dp)
+                                tint = timerColor,
+                                modifier = Modifier.size(15.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = timeFormatted,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = if (remainingSeconds < 300) Color(0xFFF87171) else Color.White
+                                style = TabularNumStyle.copy(
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = timerColor
+                                )
                             )
                         }
                     }
@@ -205,7 +200,7 @@ fun MockExamScreen(
                             Icon(
                                 imageVector = if (isFlagged) Icons.Default.Flag else Icons.Default.OutlinedFlag,
                                 contentDescription = "Flag for review",
-                                tint = if (isFlagged) AccentAmber else MaterialTheme.colorScheme.onSurfaceVariant
+                                tint = if (isFlagged) MaterialTheme.calm.warn else MaterialTheme.calm.steel
                             )
                         }
 
@@ -221,7 +216,7 @@ fun MockExamScreen(
                             Icon(
                                 imageVector = Icons.Default.GridView,
                                 contentDescription = "Question Palette",
-                                tint = AccentCyan
+                                tint = MaterialTheme.calm.steel
                             )
                         }
                     }
@@ -239,13 +234,15 @@ fun MockExamScreen(
                         text = "NCEES FS CBT Simulation",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.calm.steel
                     )
                     Text(
                         text = "Question ${currentIndex + 1} of ${questions.size} • Answered: ${userAnswers.size}/${questions.size}",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = AccentCyan
+                        style = TabularNumStyle.copy(
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.calm.accentBright
+                        )
                     )
                 }
             }
@@ -254,7 +251,7 @@ fun MockExamScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFF16181D))
+                    .background(MaterialTheme.calm.surface)
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -263,7 +260,12 @@ fun MockExamScreen(
                 OutlinedButton(
                     onClick = { if (currentIndex > 0) currentIndex-- },
                     enabled = currentIndex > 0,
-                    shape = RoundedCornerShape(20.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.calm.divider),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.calm.ink,
+                        disabledContentColor = MaterialTheme.calm.steel.copy(alpha = 0.4f)
+                    ),
                     modifier = Modifier.testTag("mock_prev_btn")
                 ) {
                     Text("Previous", fontSize = 14.sp)
@@ -272,8 +274,12 @@ fun MockExamScreen(
                 // Submit Button
                 Button(
                     onClick = { showSubmitDialog = true },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF059669)),
-                    shape = RoundedCornerShape(20.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.calm.accent,
+                        contentColor = Color.White
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp),
+                    shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.testTag("mock_submit_btn")
                 ) {
                     Text("Submit Exam", color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
@@ -288,11 +294,20 @@ fun MockExamScreen(
                             showSubmitDialog = true
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
-                    shape = RoundedCornerShape(20.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.calm.accent,
+                        contentColor = Color.White
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp),
+                    shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.testTag("mock_next_btn")
                 ) {
-                    Text(if (currentIndex < questions.size - 1) "Next" else "Review", color = Color.White, fontSize = 14.sp)
+                    Text(
+                        if (currentIndex < questions.size - 1) "Next" else "Review",
+                        color = Color.White,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp
+                    )
                 }
             }
         }
@@ -302,29 +317,29 @@ fun MockExamScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 16.dp)
+                .padding(horizontal = 20.dp, vertical = 14.dp)
         ) {
             // Flagged banner if active
             if (isFlagged) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0xFF332310))
-                        .border(1.dp, AccentAmber, RoundedCornerShape(10.dp))
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(MaterialTheme.calm.warnContainer)
+                        .border(1.dp, MaterialTheme.calm.warn.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
                         .padding(horizontal = 12.dp, vertical = 8.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = Icons.Default.Flag,
                             contentDescription = null,
-                            tint = AccentAmber,
+                            tint = MaterialTheme.calm.warn,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "Flagged for review — return to this question before submitting",
-                            color = AccentAmber,
+                            color = MaterialTheme.calm.warn,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Medium
                         )
@@ -333,33 +348,50 @@ fun MockExamScreen(
                 Spacer(modifier = Modifier.height(14.dp))
             }
 
-            // Domain Badge
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(MaterialTheme.colorScheme.secondaryContainer)
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            // Question Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = currentQuestion.domain.title,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                    text = "Question ${currentIndex + 1} of ${questions.size}",
+                    style = TabularNumStyle.copy(
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.calm.steel
+                    )
                 )
+
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(MaterialTheme.calm.surface)
+                        .border(1.dp, MaterialTheme.calm.divider, RoundedCornerShape(6.dp))
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                ) {
+                    Text(
+                        text = currentQuestion.domain.title,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.calm.steel
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            // Question Statement
+            // Question Prompt (min 16sp)
             Text(
                 text = currentQuestion.questionText,
-                fontSize = 18.sp,
-                lineHeight = 26.sp,
-                fontWeight = FontWeight.Normal,
-                color = MaterialTheme.colorScheme.onSurface
+                fontSize = 17.sp,
+                fontWeight = FontWeight.SemiBold,
+                lineHeight = 25.sp,
+                color = MaterialTheme.calm.ink,
+                modifier = Modifier.testTag("mock_question_text")
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             // Options List
             val optionLetters = listOf("A", "B", "C", "D")
@@ -370,21 +402,21 @@ fun MockExamScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 6.dp)
-                        .clip(RoundedCornerShape(14.dp))
+                        .padding(vertical = 5.dp)
+                        .clip(RoundedCornerShape(8.dp))
                         .background(
-                            if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f)
-                            else MaterialTheme.colorScheme.surface
+                            if (isSelected) MaterialTheme.calm.accentContainer
+                            else MaterialTheme.calm.surface
                         )
                         .border(
                             1.dp,
-                            if (isSelected) PrimaryBlue else MaterialTheme.colorScheme.outline,
-                            RoundedCornerShape(14.dp)
+                            if (isSelected) MaterialTheme.calm.accent else MaterialTheme.calm.divider,
+                            RoundedCornerShape(8.dp)
                         )
                         .clickable {
                             userAnswers[currentQuestion.id] = index
                         }
-                        .padding(16.dp)
+                        .padding(14.dp)
                         .testTag("mock_opt_${letter.lowercase()}")
                 ) {
                     Row(
@@ -395,14 +427,15 @@ fun MockExamScreen(
                             text = "$letter.",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = if (isSelected) PrimaryBlue else MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(end = 12.dp)
+                            color = MaterialTheme.calm.ink,
+                            modifier = Modifier.padding(end = 10.dp)
                         )
                         Text(
                             text = optionText,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Normal,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            lineHeight = 22.sp,
+                            color = MaterialTheme.calm.ink,
                             modifier = Modifier.weight(1f)
                         )
                         if (isSelected) {
@@ -410,7 +443,7 @@ fun MockExamScreen(
                                 text = "Selected",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = PrimaryBlue
+                                color = MaterialTheme.calm.accentBright
                             )
                         }
                     }
@@ -426,25 +459,25 @@ fun MockExamScreen(
         ModalBottomSheet(
             onDismissRequest = { showPaletteSheet = false },
             sheetState = paletteSheetState,
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.calm.surface,
+            shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp)
-                    .testTag("palette_sheet")
+                    .padding(horizontal = 24.dp, vertical = 8.dp)
             ) {
                 Text(
                     text = "Question Palette",
-                    fontSize = 18.sp,
+                    fontSize = 19.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.calm.ink
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Tap any question to jump directly to it",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    fontSize = 13.sp,
+                    color = MaterialTheme.calm.steel
                 )
 
                 Spacer(modifier = Modifier.height(14.dp))
@@ -454,12 +487,12 @@ fun MockExamScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    LegendItem(color = PrimaryBlue, label = "Answered")
-                    LegendItem(color = Color(0xFF2E323B), label = "Unanswered")
-                    LegendItem(color = AccentAmber, label = "Flagged")
+                    LegendItem(color = MaterialTheme.calm.accent, label = "Answered")
+                    LegendItem(color = MaterialTheme.calm.divider, label = "Unanswered")
+                    LegendItem(color = MaterialTheme.calm.warn, label = "Flagged")
                 }
 
-                Spacer(modifier = Modifier.height(18.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 // Grid of Questions
                 FlowRow(
@@ -473,73 +506,93 @@ fun MockExamScreen(
                         val isCurrent = idx == currentIndex
 
                         val bg = when {
-                            isCurrent -> Color(0xFF1D4ED8)
-                            isAnswered -> PrimaryBlue
-                            else -> Color(0xFF282B33)
+                            isCurrent -> MaterialTheme.calm.accent
+                            isAnswered -> MaterialTheme.calm.accentContainer
+                            else -> MaterialTheme.calm.surface
+                        }
+                        val border = when {
+                            isQFlagged -> MaterialTheme.calm.warn
+                            isCurrent -> MaterialTheme.calm.accent
+                            isAnswered -> MaterialTheme.calm.accent.copy(alpha = 0.5f)
+                            else -> MaterialTheme.calm.divider
+                        }
+                        val textCol = when {
+                            isCurrent -> Color.White
+                            isAnswered -> MaterialTheme.calm.accentBright
+                            else -> MaterialTheme.calm.steel
                         }
 
                         Box(
                             modifier = Modifier
-                                .size(44.dp)
-                                .clip(RoundedCornerShape(8.dp))
+                                .size(42.dp)
+                                .clip(RoundedCornerShape(6.dp))
                                 .background(bg)
                                 .border(
-                                    if (isQFlagged) 2.dp else if (isCurrent) 2.dp else 1.dp,
-                                    if (isQFlagged) AccentAmber else if (isCurrent) Color.White else MaterialTheme.colorScheme.outline,
-                                    RoundedCornerShape(8.dp)
+                                    1.dp,
+                                    border,
+                                    RoundedCornerShape(6.dp)
                                 )
                                 .clickable {
                                     currentIndex = idx
                                     showPaletteSheet = false
-                                },
+                                }
+                                .testTag("palette_q_${idx + 1}"),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = "${idx + 1}",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                style = TabularNumStyle.copy(
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = textCol
+                                )
                             )
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(28.dp))
             }
         }
     }
 
-    // Submit Confirmation Dialog
+    // Submit Early Confirmation Dialog
     if (showSubmitDialog) {
-        val answeredCount = userAnswers.size
-        val unansweredCount = questions.size - answeredCount
-        val flaggedCount = flaggedQuestionIds.value.size
-
         AlertDialog(
             onDismissRequest = { showSubmitDialog = false },
             title = {
-                Text("Submit Mock Exam?", fontWeight = FontWeight.Bold)
+                Text("Submit Mock Exam?", fontWeight = FontWeight.Bold, color = MaterialTheme.calm.ink)
             },
             text = {
                 Column {
-                    Text("You have completed $answeredCount of ${questions.size} questions.")
+                    Text(
+                        "You have completed $answeredCount of ${questions.size} questions.",
+                        color = MaterialTheme.calm.ink,
+                        fontSize = 14.sp
+                    )
                     if (unansweredCount > 0) {
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = "⚠️ $unansweredCount questions are unanswered.",
-                            color = Color(0xFFF87171),
-                            fontWeight = FontWeight.Medium
+                            color = MaterialTheme.calm.warn,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 13.sp
                         )
                     }
                     if (flaggedCount > 0) {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "🚩 $flaggedCount questions are flagged for review.",
-                            color = AccentAmber
+                            color = MaterialTheme.calm.steel,
+                            fontSize = 13.sp
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Are you ready to submit and view your domain diagnostic score report?")
+                    Text(
+                        "Are you ready to submit and view your domain diagnostic score report?",
+                        color = MaterialTheme.calm.steel,
+                        fontSize = 13.sp
+                    )
                 }
             },
             confirmButton = {
@@ -550,7 +603,12 @@ fun MockExamScreen(
                         val timeSpent = (timeLimitMinutes * 60) - remainingSeconds
                         submitExamInternal(questions, userAnswers, flaggedQuestionIds.value, timeSpent, onSubmitExam)
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF059669)),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.calm.accent,
+                        contentColor = Color.White
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp),
+                    shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.testTag("confirm_submit_btn")
                 ) {
                     Text("Submit", color = Color.White)
@@ -558,10 +616,11 @@ fun MockExamScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showSubmitDialog = false }) {
-                    Text("Keep Testing")
+                    Text("Keep Testing", color = MaterialTheme.calm.steel)
                 }
             },
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.calm.surface,
+            shape = RoundedCornerShape(8.dp)
         )
     }
 
@@ -569,25 +628,31 @@ fun MockExamScreen(
     if (showExitDialog) {
         AlertDialog(
             onDismissRequest = { showExitDialog = false },
-            title = { Text("Quit Mock Exam?") },
-            text = { Text("Your exam progress will be lost if you exit without submitting.") },
+            title = { Text("Quit Mock Exam?", fontWeight = FontWeight.Bold, color = MaterialTheme.calm.ink) },
+            text = { Text("Your exam progress will be lost if you exit without submitting.", color = MaterialTheme.calm.steel, fontSize = 14.sp) },
             confirmButton = {
                 Button(
                     onClick = {
                         showExitDialog = false
                         onCancelExam()
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF4444))
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.calm.warn,
+                        contentColor = Color.White
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Text("Quit Exam", color = Color.White)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showExitDialog = false }) {
-                    Text("Continue Exam")
+                    Text("Continue Exam", color = MaterialTheme.calm.steel)
                 }
             },
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.calm.surface,
+            shape = RoundedCornerShape(8.dp)
         )
     }
 }
@@ -597,39 +662,38 @@ private fun submitExamInternal(
     answers: Map<String, Int>,
     flags: Set<String>,
     timeSpentSeconds: Int,
-    onResult: (MockExamResult) -> Unit
+    onSubmitExam: (MockExamResult) -> Unit
 ) {
-    var correct = 0
-    val domainCounts = mutableMapOf<FsDomain, Pair<Int, Int>>() // domain -> (correct, total)
+    val totalCount = questions.size
+    val correctCount = questions.count { q ->
+        answers[q.id] == q.correctIndex
+    }
+    val scorePct = if (totalCount > 0) (correctCount * 100) / totalCount else 0
 
+    // Compute domain breakdown
+    val domainScores = mutableMapOf<FsDomain, Pair<Int, Int>>()
     questions.forEach { q ->
-        val chosen = answers[q.id]
-        val isCorrect = (chosen != null && chosen == q.correctIndex)
-        if (isCorrect) correct++
-
-        val current = domainCounts[q.domain] ?: Pair(0, 0)
-        domainCounts[q.domain] = Pair(
+        val current = domainScores.getOrDefault(q.domain, Pair(0, 0))
+        val isCorrect = (answers[q.id] == q.correctIndex)
+        domainScores[q.domain] = Pair(
             current.first + (if (isCorrect) 1 else 0),
             current.second + 1
         )
     }
 
-    val percentage = if (questions.isNotEmpty()) ((correct.toFloat() / questions.size) * 100).toInt() else 0
-    val isPassing = percentage >= 70
-
     val result = MockExamResult(
         id = "mock_${System.currentTimeMillis()}",
         timestamp = System.currentTimeMillis(),
-        totalQuestions = questions.size,
-        correctCount = correct,
-        scorePercentage = percentage,
-        timeSpentSeconds = timeSpentSeconds.coerceAtLeast(1),
-        isPassing = isPassing,
-        domainScores = domainCounts,
+        totalQuestions = totalCount,
+        correctCount = correctCount,
+        scorePercentage = scorePct,
+        timeSpentSeconds = timeSpentSeconds,
+        isPassing = scorePct >= 70,
+        domainScores = domainScores,
         userAnswers = answers,
         flaggedQuestionIds = flags
     )
-    onResult(result)
+    onSubmitExam(result)
 }
 
 @Composable
@@ -637,11 +701,15 @@ private fun LegendItem(color: Color, label: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier
-                .size(12.dp)
-                .clip(CircleShape)
+                .size(10.dp)
+                .clip(RoundedCornerShape(2.dp))
                 .background(color)
         )
         Spacer(modifier = Modifier.width(6.dp))
-        Text(text = label, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            text = label,
+            fontSize = 12.sp,
+            color = MaterialTheme.calm.steel
+        )
     }
 }

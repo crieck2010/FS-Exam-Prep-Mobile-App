@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -47,7 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.model.FsDomain
 import com.example.model.QuestionDifficulty
-import com.example.ui.theme.PrimaryBlue
+import com.example.ui.theme.calm
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -58,40 +57,41 @@ fun QuizConfigSheet(
     onStartQuiz: (domain: FsDomain?, count: Int, focusGrowth: Boolean, difficulty: QuestionDifficulty) -> Unit
 ) {
     var selectedDomain by remember { mutableStateOf<FsDomain?>(initialDomain) }
-    var focusGrowth by remember { mutableStateOf(false) }
     var selectedCount by remember { mutableIntStateOf(10) }
     var isCustomCount by remember { mutableStateOf(false) }
-    var customCountText by remember { mutableStateOf("15") }
+    var customCountText by remember { mutableStateOf("10") }
+    var focusGrowth by remember { mutableStateOf(false) }
     var selectedDifficulty by remember { mutableStateOf(QuestionDifficulty.ABOUT_THE_SAME) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+        containerColor = MaterialTheme.calm.surface,
+        shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp, vertical = 8.dp)
-                .testTag("quiz_config_sheet")
         ) {
             Text(
                 text = "Add more questions",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.calm.ink
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
             // Focus Section
             Text(
                 text = "Focus",
                 fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.calm.steel
             )
             Spacer(modifier = Modifier.height(8.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -105,6 +105,7 @@ fun QuizConfigSheet(
                     },
                     modifier = Modifier.testTag("chip_all_topics")
                 )
+
                 ChipOption(
                     text = "Growth areas",
                     selected = focusGrowth,
@@ -132,9 +133,11 @@ fun QuizConfigSheet(
             Text(
                 text = "Number of questions",
                 fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.calm.steel
             )
             Spacer(modifier = Modifier.height(8.dp))
+
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -170,9 +173,11 @@ fun QuizConfigSheet(
                     onValueChange = { customCountText = it.filter { ch -> ch.isDigit() }.take(2) },
                     label = { Text("Enter number of questions (1-50)") },
                     singleLine = true,
+                    shape = RoundedCornerShape(8.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = PrimaryBlue,
-                        focusedLabelColor = PrimaryBlue
+                        focusedBorderColor = MaterialTheme.calm.accent,
+                        focusedLabelColor = MaterialTheme.calm.accent,
+                        unfocusedBorderColor = MaterialTheme.calm.divider
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -186,9 +191,11 @@ fun QuizConfigSheet(
             Text(
                 text = "Difficulty",
                 fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.calm.steel
             )
             Spacer(modifier = Modifier.height(8.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -227,11 +234,13 @@ fun QuizConfigSheet(
                 ) {
                     Text(
                         text = "Cancel",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = MaterialTheme.calm.steel,
                         fontSize = 15.sp
                     )
                 }
+
                 Spacer(modifier = Modifier.width(12.dp))
+
                 Button(
                     onClick = {
                         val count = if (isCustomCount) {
@@ -241,8 +250,12 @@ fun QuizConfigSheet(
                         }
                         onStartQuiz(selectedDomain, count, focusGrowth, selectedDifficulty)
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
-                    shape = RoundedCornerShape(20.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.calm.accent,
+                        contentColor = Color.White
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp, pressedElevation = 0.dp),
+                    shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.testTag("add_questions_button")
                 ) {
                     Text(
@@ -267,17 +280,17 @@ fun ChipOption(
     modifier: Modifier = Modifier,
     icon: (@Composable () -> Unit)? = null
 ) {
-    val bgColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
-    val borderColor = if (selected) PrimaryBlue else MaterialTheme.colorScheme.outline
-    val textColor = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+    val bgColor = if (selected) MaterialTheme.calm.accentContainer else MaterialTheme.calm.surface
+    val borderColor = if (selected) MaterialTheme.calm.accent else MaterialTheme.calm.divider
+    val textColor = if (selected) MaterialTheme.calm.accentBright else MaterialTheme.calm.steel
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(6.dp))
             .background(bgColor)
-            .border(1.dp, borderColor, RoundedCornerShape(8.dp))
+            .border(1.dp, borderColor, RoundedCornerShape(6.dp))
             .clickable { onClick() }
-            .padding(horizontal = 14.dp, vertical = 10.dp),
+            .padding(horizontal = 14.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center
     ) {
         Row(

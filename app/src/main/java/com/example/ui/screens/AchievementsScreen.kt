@@ -17,12 +17,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -37,18 +39,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.model.Achievement
 import com.example.model.AchievementCategory
-import com.example.ui.theme.AccentAmber
-import com.example.ui.theme.AccentCyan
-import com.example.ui.theme.CorrectBadgeBg
-import com.example.ui.theme.CorrectBadgeText
-import com.example.ui.theme.PrimaryBlue
+import com.example.ui.theme.TabularNumStyle
+import com.example.ui.theme.calm
 
 @Composable
 fun AchievementsScreen(
@@ -59,7 +57,7 @@ fun AchievementsScreen(
 
     var selectedCategory by remember { mutableStateOf<AchievementCategory?>(null) }
 
-    val unlockedCount = achievements.count { it.isUnlocked }
+    val unlockedCount = remember(achievements) { achievements.count { it.isUnlocked } }
     val totalCount = achievements.size
 
     val filteredAchievements = remember(achievements, selectedCategory) {
@@ -68,33 +66,36 @@ fun AchievementsScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = MaterialTheme.calm.bg,
         topBar = {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(MaterialTheme.calm.surface)
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = onBack, modifier = Modifier.testTag("achievements_back_btn")) {
+                IconButton(onClick = onBack, modifier = Modifier.testTag("achievements_back_button")) {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        tint = MaterialTheme.colorScheme.onBackground
+                        tint = MaterialTheme.calm.steel
                     )
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Column {
                     Text(
-                        text = "Achievement Badges",
+                        text = "Milestones & Badges",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.calm.ink
                     )
                     Text(
-                        text = "$unlockedCount of $totalCount Unlocked",
-                        fontSize = 12.sp,
-                        color = AccentAmber
+                        text = "$unlockedCount of $totalCount unlocked",
+                        style = TabularNumStyle.copy(
+                            fontSize = 12.sp,
+                            color = MaterialTheme.calm.steel
+                        )
                     )
                 }
             }
@@ -107,50 +108,63 @@ fun AchievementsScreen(
                 .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // Milestone Progress Card
             item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(18.dp))
-                        .background(AccentAmber.copy(alpha = 0.12f))
-                        .border(1.dp, Color(0xFFD97706), RoundedCornerShape(18.dp))
-                        .padding(20.dp)
+                Spacer(modifier = Modifier.height(4.dp))
+                // Overview Hero Card (Flat, hairline border)
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.calm.surface),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.calm.divider),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
-                    Column {
+                    Column(modifier = Modifier.padding(18.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = "Surveyor Milestones",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
+                            Icon(
+                                imageVector = Icons.Default.EmojiEvents,
+                                contentDescription = null,
+                                tint = MaterialTheme.calm.steel,
+                                modifier = Modifier.size(24.dp)
                             )
-                            Text(
-                                text = "$unlockedCount / $totalCount",
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = AccentAmber
-                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Achievement Progress",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.calm.ink
+                                )
+                                Text(
+                                    text = "$unlockedCount / $totalCount badges earned",
+                                    style = TabularNumStyle.copy(
+                                        fontSize = 13.sp,
+                                        color = MaterialTheme.calm.steel
+                                    )
+                                )
+                            }
                         }
-                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Spacer(modifier = Modifier.height(14.dp))
+
                         LinearProgressIndicator(
                             progress = { if (totalCount > 0) (unlockedCount.toFloat() / totalCount) else 0f },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(8.dp)
-                                .clip(RoundedCornerShape(4.dp)),
-                            color = AccentAmber,
-                            trackColor = MaterialTheme.colorScheme.surfaceVariant
+                                .height(3.dp)
+                                .clip(RoundedCornerShape(2.dp)),
+                            color = MaterialTheme.calm.accentBright,
+                            trackColor = MaterialTheme.calm.divider
                         )
+
                         Spacer(modifier = Modifier.height(8.dp))
+
                         Text(
                             text = "Earn badges for study consistency, high accuracy, and domain mastery.",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            fontSize = 13.sp,
+                            color = MaterialTheme.calm.steel
                         )
                     }
                 }
@@ -185,7 +199,7 @@ fun AchievementsScreen(
                 }
             }
 
-            // Achievement Cards
+            // Achievement Cards (Flat rows separated by hairline dividers)
             items(filteredAchievements) { achievement ->
                 AchievementCard(achievement = achievement)
             }
@@ -203,10 +217,15 @@ private fun FilterChipItem(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
+    val chipBg = if (isSelected) MaterialTheme.calm.accentContainer else MaterialTheme.calm.surface
+    val chipBorder = if (isSelected) MaterialTheme.calm.accent else MaterialTheme.calm.divider
+    val chipText = if (isSelected) MaterialTheme.calm.accentBright else MaterialTheme.calm.steel
+
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(if (isSelected) PrimaryBlue else Color(0xFF22242B))
+            .clip(RoundedCornerShape(6.dp))
+            .background(chipBg)
+            .border(1.dp, chipBorder, RoundedCornerShape(6.dp))
             .clickable { onClick() }
             .padding(horizontal = 14.dp, vertical = 7.dp)
     ) {
@@ -214,7 +233,7 @@ private fun FilterChipItem(
             text = label,
             fontSize = 13.sp,
             fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-            color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+            color = chipText
         )
     }
 }
@@ -226,14 +245,10 @@ private fun AchievementCard(achievement: Achievement) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(if (isUnlocked) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-            .border(
-                1.dp,
-                if (isUnlocked) PrimaryBlue else MaterialTheme.colorScheme.outline,
-                RoundedCornerShape(16.dp)
-            )
-            .padding(16.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.calm.surface)
+            .border(1.dp, MaterialTheme.calm.divider, RoundedCornerShape(8.dp))
+            .padding(14.dp)
             .testTag("ach_card_${achievement.id}")
     ) {
         Row(
@@ -243,29 +258,29 @@ private fun AchievementCard(achievement: Achievement) {
             // Icon Halo
             Box(
                 modifier = Modifier
-                    .size(52.dp)
-                    .clip(CircleShape)
-                    .background(if (isUnlocked) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant)
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(if (isUnlocked) MaterialTheme.calm.accentContainer else MaterialTheme.calm.surface)
                     .border(
-                        1.5.dp,
-                        if (isUnlocked) PrimaryBlue else MaterialTheme.colorScheme.outline,
-                        CircleShape
+                        1.dp,
+                        if (isUnlocked) MaterialTheme.calm.accent else MaterialTheme.calm.divider,
+                        RoundedCornerShape(6.dp)
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 if (isUnlocked) {
-                    Text(text = achievement.iconEmoji, fontSize = 26.sp)
+                    Text(text = achievement.iconEmoji, fontSize = 22.sp)
                 } else {
                     Icon(
                         imageVector = Icons.Default.Lock,
                         contentDescription = "Locked",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(22.dp)
+                        tint = MaterialTheme.calm.steel,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.width(14.dp))
+            Spacer(modifier = Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Row(
@@ -276,43 +291,44 @@ private fun AchievementCard(achievement: Achievement) {
                     Text(
                         text = achievement.title,
                         fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isUnlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+                        fontWeight = FontWeight.SemiBold,
+                        color = if (isUnlocked) MaterialTheme.calm.ink else MaterialTheme.calm.steel
                     )
 
                     if (isUnlocked) {
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(CorrectBadgeBg)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(MaterialTheme.calm.goContainer)
+                                .border(1.dp, MaterialTheme.calm.go.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
                                 .padding(horizontal = 8.dp, vertical = 3.dp)
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     imageVector = Icons.Default.Check,
                                     contentDescription = null,
-                                    tint = CorrectBadgeText,
+                                    tint = MaterialTheme.calm.go,
                                     modifier = Modifier.size(10.dp)
                                 )
                                 Spacer(modifier = Modifier.width(3.dp))
                                 Text(
                                     text = "Unlocked",
                                     fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = CorrectBadgeText
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.calm.go
                                 )
                             }
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(3.dp))
 
                 Text(
                     text = achievement.description,
-                    fontSize = 12.sp,
-                    lineHeight = 16.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    fontSize = 13.sp,
+                    lineHeight = 17.sp,
+                    color = MaterialTheme.calm.steel
                 )
 
                 if (!isUnlocked) {
@@ -326,16 +342,18 @@ private fun AchievementCard(achievement: Achievement) {
                             progress = { achievement.progressFraction },
                             modifier = Modifier
                                 .weight(1f)
-                                .height(5.dp)
-                                .clip(RoundedCornerShape(3.dp)),
-                            color = PrimaryBlue,
-                            trackColor = MaterialTheme.colorScheme.surfaceVariant
+                                .height(3.dp)
+                                .clip(RoundedCornerShape(2.dp)),
+                            color = MaterialTheme.calm.accentBright,
+                            trackColor = MaterialTheme.calm.divider
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "${achievement.currentProgress}/${achievement.targetProgress}",
-                            fontSize = 11.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            style = TabularNumStyle.copy(
+                                fontSize = 11.sp,
+                                color = MaterialTheme.calm.steel
+                            )
                         )
                     }
                 }

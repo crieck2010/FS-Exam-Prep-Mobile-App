@@ -17,20 +17,22 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -48,9 +50,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.model.LeaderboardUser
-import com.example.ui.theme.AccentAmber
-import com.example.ui.theme.AccentCyan
-import com.example.ui.theme.PrimaryBlue
+import com.example.ui.theme.TabularNumStyle
+import com.example.ui.theme.calm
 
 @Composable
 fun LeaderboardScreen(
@@ -61,47 +62,49 @@ fun LeaderboardScreen(
 ) {
     BackHandler { onBack() }
 
+    var selectedFilter by remember { mutableStateOf("All-Time") }
     var showEditDialog by remember { mutableStateOf(false) }
     var editHandleText by remember { mutableStateOf(currentUserHandle) }
-    var selectedFilter by remember { mutableStateOf("All-Time") }
 
-    val currentUser = leaderboard.find { it.isCurrentUser }
+    val myEntry = remember(leaderboard) { leaderboard.find { it.isCurrentUser } }
 
     val sortedList = remember(leaderboard, selectedFilter) {
         when (selectedFilter) {
             "Top Streaks" -> leaderboard.sortedByDescending { it.streakDays }
+            "This Week" -> leaderboard.sortedByDescending { it.scorePoints }
             else -> leaderboard.sortedBy { it.rank }
         }
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = MaterialTheme.calm.bg,
         topBar = {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(MaterialTheme.calm.surface)
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = onBack, modifier = Modifier.testTag("leaderboard_back_btn")) {
+                IconButton(onClick = onBack, modifier = Modifier.testTag("leaderboard_back_button")) {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        tint = MaterialTheme.colorScheme.onBackground
+                        tint = MaterialTheme.calm.steel
                     )
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Column {
                     Text(
-                        text = "Community Leaderboard",
+                        text = "Peer Study Benchmarks",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.calm.ink
                     )
                     Text(
-                        text = "Anonymous peer ranking for NCEES FS exam prep",
+                        text = "Anonymous cohort comparison",
                         fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.calm.steel
                     )
                 }
             }
@@ -114,67 +117,117 @@ fun LeaderboardScreen(
                 .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // User Profile Banner Card
             item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(18.dp))
-                        .background(MaterialTheme.colorScheme.primaryContainer)
-                        .border(1.dp, PrimaryBlue, RoundedCornerShape(18.dp))
-                        .padding(18.dp)
+                Spacer(modifier = Modifier.height(4.dp))
+                // User's Current Standing Card (Flat, hairline border)
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.calm.surface),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.calm.divider),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column {
+                    Column(modifier = Modifier.padding(18.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = currentUserHandle,
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                IconButton(
-                                    onClick = {
-                                        editHandleText = currentUserHandle
-                                        showEditDialog = true
-                                    },
-                                    modifier = Modifier.size(24.dp)
+                                Box(
+                                    modifier = Modifier
+                                        .size(38.dp)
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(MaterialTheme.calm.accentContainer),
+                                    contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Default.Edit,
-                                        contentDescription = "Change handle",
-                                        tint = PrimaryBlue,
-                                        modifier = Modifier.size(16.dp)
+                                        imageVector = Icons.Default.Person,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.calm.accentBright,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Column {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = currentUserHandle,
+                                            fontSize = 15.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = MaterialTheme.calm.ink
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        IconButton(
+                                            onClick = {
+                                                editHandleText = currentUserHandle
+                                                showEditDialog = true
+                                            },
+                                            modifier = Modifier.size(22.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Edit,
+                                                contentDescription = "Edit Callsign",
+                                                tint = MaterialTheme.calm.steel,
+                                                modifier = Modifier.size(14.dp)
+                                            )
+                                        }
+                                    }
+                                    Text(
+                                        text = "Your Anonymous Profile",
+                                        fontSize = 11.sp,
+                                        color = MaterialTheme.calm.steel
                                     )
                                 }
                             }
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Your Anonymous Callsign",
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-                            )
+
+                            // Rank Pill
+                            if (myEntry != null) {
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(MaterialTheme.calm.surface)
+                                        .border(1.dp, MaterialTheme.calm.divider, RoundedCornerShape(6.dp))
+                                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                                ) {
+                                    Text(
+                                        text = "Rank #${myEntry.rank}",
+                                        style = TabularNumStyle.copy(
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = MaterialTheme.calm.ink
+                                        )
+                                    )
+                                }
+                            }
                         }
 
-                        // User Rank Callout
-                        if (currentUser != null) {
-                            Column(horizontalAlignment = Alignment.End) {
+                        if (myEntry != null) {
+                            Spacer(modifier = Modifier.height(14.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
                                 Text(
-                                    text = "Rank #${currentUser.rank}",
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = AccentAmber
+                                    text = "Points: ${myEntry.scorePoints} pts",
+                                    style = TabularNumStyle.copy(
+                                        fontSize = 13.sp,
+                                        color = MaterialTheme.calm.steel
+                                    )
                                 )
                                 Text(
-                                    text = "${currentUser.scorePoints} pts",
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = AccentCyan
+                                    text = "Streak: ${myEntry.streakDays} days",
+                                    style = TabularNumStyle.copy(
+                                        fontSize = 13.sp,
+                                        color = MaterialTheme.calm.steel
+                                    )
+                                )
+                                Text(
+                                    text = "Accuracy: ${myEntry.accuracy}%",
+                                    style = TabularNumStyle.copy(
+                                        fontSize = 13.sp,
+                                        color = MaterialTheme.calm.steel
+                                    )
                                 )
                             }
                         }
@@ -190,10 +243,15 @@ fun LeaderboardScreen(
                 ) {
                     listOf("All-Time", "Top Streaks", "This Week").forEach { filter ->
                         val isSelected = selectedFilter == filter
+                        val chipBg = if (isSelected) MaterialTheme.calm.accentContainer else MaterialTheme.calm.surface
+                        val chipBorder = if (isSelected) MaterialTheme.calm.accent else MaterialTheme.calm.divider
+                        val chipText = if (isSelected) MaterialTheme.calm.accentBright else MaterialTheme.calm.steel
+
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(if (isSelected) PrimaryBlue else MaterialTheme.colorScheme.surfaceVariant)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(chipBg)
+                                .border(1.dp, chipBorder, RoundedCornerShape(6.dp))
                                 .clickable { selectedFilter = filter }
                                 .padding(horizontal = 14.dp, vertical = 7.dp)
                         ) {
@@ -201,14 +259,14 @@ fun LeaderboardScreen(
                                 text = filter,
                                 fontSize = 13.sp,
                                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                                color = chipText
                             )
                         }
                     }
                 }
             }
 
-            // Leaderboard User Rows
+            // Leaderboard User Rows (Plain ranked list, flat rows, no arcade art)
             items(sortedList) { user ->
                 LeaderboardRow(user = user)
             }
@@ -223,13 +281,19 @@ fun LeaderboardScreen(
     if (showEditDialog) {
         AlertDialog(
             onDismissRequest = { showEditDialog = false },
-            title = { Text("Edit Anonymous Callsign") },
+            title = {
+                Text(
+                    text = "Edit Anonymous Callsign",
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.calm.ink
+                )
+            },
             text = {
                 Column {
                     Text(
                         text = "Choose a privacy-friendly username to display on the peer leaderboard.",
                         fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.calm.steel
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     OutlinedTextField(
@@ -237,6 +301,12 @@ fun LeaderboardScreen(
                         onValueChange = { editHandleText = it.take(20) },
                         label = { Text("Callsign") },
                         singleLine = true,
+                        shape = RoundedCornerShape(8.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.calm.accent,
+                            focusedLabelColor = MaterialTheme.calm.accent,
+                            unfocusedBorderColor = MaterialTheme.calm.divider
+                        ),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -247,17 +317,23 @@ fun LeaderboardScreen(
                         onUpdateHandle(editHandleText)
                         showEditDialog = false
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.calm.accent,
+                        contentColor = Color.White
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Text("Save", color = Color.White)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showEditDialog = false }) {
-                    Text("Cancel")
+                    Text("Cancel", color = MaterialTheme.calm.steel)
                 }
             },
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.calm.surface,
+            shape = RoundedCornerShape(8.dp)
         )
     }
 }
@@ -266,23 +342,15 @@ fun LeaderboardScreen(
 private fun LeaderboardRow(user: LeaderboardUser) {
     val isMe = user.isCurrentUser
 
-    val rankColor = when (user.rank) {
-        1 -> Color(0xFFFFD700) // Gold
-        2 -> Color(0xFFC0C0C0) // Silver
-        3 -> Color(0xFFCD7F32) // Bronze
-        else -> MaterialTheme.colorScheme.onSurfaceVariant
-    }
+    val rowBg = if (isMe) MaterialTheme.calm.accentContainer else MaterialTheme.calm.surface
+    val rowBorder = if (isMe) MaterialTheme.calm.accent else MaterialTheme.calm.divider
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(if (isMe) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f) else MaterialTheme.colorScheme.surface)
-            .border(
-                1.dp,
-                if (isMe) PrimaryBlue else MaterialTheme.colorScheme.outline,
-                RoundedCornerShape(14.dp)
-            )
+            .clip(RoundedCornerShape(8.dp))
+            .background(rowBg)
+            .border(1.dp, rowBorder, RoundedCornerShape(8.dp))
             .padding(14.dp)
             .testTag("leaderboard_row_${user.rank}")
     ) {
@@ -290,29 +358,23 @@ private fun LeaderboardRow(user: LeaderboardUser) {
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Rank Number / Trophy
+            // Rank Number (Plain ranked list, tabular numerals)
             Box(
                 modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                    .size(32.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(MaterialTheme.calm.surface)
+                    .border(1.dp, MaterialTheme.calm.divider, RoundedCornerShape(6.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                if (user.rank <= 3) {
-                    Icon(
-                        imageVector = Icons.Default.EmojiEvents,
-                        contentDescription = "Trophy",
-                        tint = rankColor,
-                        modifier = Modifier.size(18.dp)
-                    )
-                } else {
-                    Text(
-                        text = "#${user.rank}",
+                Text(
+                    text = "${user.rank}",
+                    style = TabularNumStyle.copy(
                         fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = rankColor
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.calm.ink
                     )
-                }
+                )
             }
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -323,21 +385,21 @@ private fun LeaderboardRow(user: LeaderboardUser) {
                         text = user.handle,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = if (isMe) PrimaryBlue else MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.calm.ink
                     )
                     if (isMe) {
                         Spacer(modifier = Modifier.width(6.dp))
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(MaterialTheme.colorScheme.primaryContainer)
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(MaterialTheme.calm.accent)
                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                         ) {
                             Text(
                                 text = "YOU",
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = PrimaryBlue
+                                color = Color.White
                             )
                         }
                     }
@@ -346,43 +408,48 @@ private fun LeaderboardRow(user: LeaderboardUser) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = "${user.questionsAnswered} questions • ${user.accuracy}% acc",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = TabularNumStyle.copy(
+                            fontSize = 12.sp,
+                            color = MaterialTheme.calm.steel
+                        )
                     )
                     if (user.badgeLabel != null) {
-                        Text(text = " • ", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+                        Text(text = " • ", color = MaterialTheme.calm.steel, fontSize = 12.sp)
                         Text(
                             text = user.badgeLabel,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium,
-                            color = AccentCyan
+                            color = MaterialTheme.calm.accentBright
                         )
                     }
                 }
             }
 
-            // Streak & Points
+            // Streak & Points (Tabular numerals)
             Column(horizontalAlignment = Alignment.End) {
                 Text(
                     text = "${user.scorePoints} pts",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    style = TabularNumStyle.copy(
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.calm.ink
+                    )
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.LocalFireDepartment,
                         contentDescription = null,
-                        tint = AccentAmber,
-                        modifier = Modifier.size(14.dp)
+                        tint = MaterialTheme.calm.steel,
+                        modifier = Modifier.size(13.dp)
                     )
                     Spacer(modifier = Modifier.width(2.dp))
                     Text(
                         text = "${user.streakDays}d",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = AccentAmber
+                        style = TabularNumStyle.copy(
+                            fontSize = 12.sp,
+                            color = MaterialTheme.calm.steel
+                        )
                     )
                 }
             }
