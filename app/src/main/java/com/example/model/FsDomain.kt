@@ -1,62 +1,60 @@
 package com.example.model
 
 enum class FsDomain(
+    val slug: String,
     val title: String,
     val shortCode: String,
-    val description: String,
-    val targetExamQuestions: String
+    val description: String
 ) {
-    MATH_AND_SCIENCES(
-        title = "Mathematics & Basic Sciences",
+    APPLIED_MATH_STATISTICS(
+        slug = "applied-math-statistics",
+        title = "Applied Math & Statistics",
         shortCode = "MATH",
-        description = "Algebra, trigonometry, statistics, error propagation, and basic physics",
-        targetExamQuestions = "13–20 questions"
+        description = "Algebra, trigonometry, statistics, error propagation, and basic physics"
     ),
-    SURVEY_METHODS_EQUIPMENT(
-        title = "Surveying Methods and Field Equipment",
-        shortCode = "EQUIP",
-        description = "Total stations, leveling circuits, peg test, GNSS receivers, error types",
-        targetExamQuestions = "15–23 questions"
-    ),
-    GEODESY_AND_PROJECTIONS(
-        title = "Geodesy and Map Projections",
-        shortCode = "GEOD",
-        description = "Datums (NAD83, NAVD88), SPCS, UTM, Lambert & Transverse Mercator, scale factors",
-        targetExamQuestions = "10–15 questions"
-    ),
-    BOUNDARY_LAW_PRINCIPLES(
-        title = "Boundary Law and Professional Principles",
+    BOUNDARY_LAW_REAL_PROPERTY(
+        slug = "boundary-law-and-real-property",
+        title = "Boundary Law & Real Property",
         shortCode = "LAW",
-        description = "Conveyances, riparian rights, easements, unwritten rights, professional ethics",
-        targetExamQuestions = "13–20 questions"
+        description = "Conveyances, riparian rights, easements, unwritten rights, and PLSS"
     ),
-    PLSS(
-        title = "Public Land Survey System (PLSS)",
-        shortCode = "PLSS",
-        description = "Aliquot parts acreage, fractional sections, lost vs obliterated corners",
-        targetExamQuestions = "13–20 questions"
+    BUSINESS_CONCEPTS_ETHICS(
+        slug = "business-concepts-ethics",
+        title = "Business Concepts & Ethics",
+        shortCode = "ETHICS",
+        description = "Professional ethics, business practices, contracts, and liability"
     ),
-    APPLIED_MATH_COGO(
-        title = "Applied Math and Unit Conversions",
-        shortCode = "COGO",
-        description = "Bearings/azimuths, coordinate geometry, traverse closure, Compass Rule",
-        targetExamQuestions = "12–18 questions"
+    MAPPING_PROCESSES_METHODS(
+        slug = "mapping-processes-and-methods",
+        title = "Mapping Processes & Methods",
+        shortCode = "MAP",
+        description = "Photogrammetry, remote sensing, LiDAR, and GIS mapping"
     ),
-    CURVES(
-        title = "Horizontal & Vertical Curves",
-        shortCode = "CURV",
-        description = "Arc/chord definition, circular curve geometry, parabolic vertical crest/sag",
-        targetExamQuestions = "9–14 questions"
+    SURVEY_COMPUTATIONS(
+        slug = "survey-computations",
+        title = "Survey Computations",
+        shortCode = "COMP",
+        description = "COGO, coordinate geometry, traverse closure, horizontal and vertical curves"
     ),
-    PHOTOGRAMMETRY_GIS(
-        title = "Photogrammetry, Remote Sensing & GIS",
-        shortCode = "PHOTO",
-        description = "Photo scale, relief displacement, flight lines, LiDAR, raster/vector GIS",
-        targetExamQuestions = "7–11 questions"
+    SURVEYING_PRINCIPLES_GEODESY(
+        slug = "surveying-principles-geodesy",
+        title = "Surveying Principles & Geodesy",
+        shortCode = "GEOD",
+        description = "Geodesy, datums, map projections, SPCS, and UTM"
+    ),
+    SURVEYING_PROCESSES_METHODS(
+        slug = "surveying-processes-and-methods",
+        title = "Surveying Processes & Methods",
+        shortCode = "PROC",
+        description = "Field procedures, total stations, leveling, GNSS, and equipment error"
     );
 
     companion object {
-        fun fromId(id: String?): FsDomain? = entries.find { it.name == id }
+        fun fromId(id: String?): FsDomain? =
+            entries.find { it.name.equals(id, ignoreCase = true) || it.slug.equals(id, ignoreCase = true) }
+
+        fun fromSlug(slug: String?): FsDomain? =
+            entries.find { it.slug == slug }
     }
 }
 

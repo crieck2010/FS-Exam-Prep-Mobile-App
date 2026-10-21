@@ -853,14 +853,13 @@ private fun DomainCard(
     onStartQuiz: () -> Unit
 ) {
     val icon = when (domain) {
-        FsDomain.MATH_AND_SCIENCES -> Icons.Default.Calculate
-        FsDomain.SURVEY_METHODS_EQUIPMENT -> Icons.Default.Construction
-        FsDomain.GEODESY_AND_PROJECTIONS -> Icons.Default.Public
-        FsDomain.BOUNDARY_LAW_PRINCIPLES -> Icons.Default.Gavel
-        FsDomain.PLSS -> Icons.Default.GridOn
-        FsDomain.APPLIED_MATH_COGO -> Icons.Default.Architecture
-        FsDomain.CURVES -> Icons.Default.Timeline
-        FsDomain.PHOTOGRAMMETRY_GIS -> Icons.Default.SatelliteAlt
+        FsDomain.APPLIED_MATH_STATISTICS -> Icons.Default.Calculate
+        FsDomain.BOUNDARY_LAW_REAL_PROPERTY -> Icons.Default.Gavel
+        FsDomain.BUSINESS_CONCEPTS_ETHICS -> Icons.Default.MenuBook
+        FsDomain.MAPPING_PROCESSES_METHODS -> Icons.Default.SatelliteAlt
+        FsDomain.SURVEY_COMPUTATIONS -> Icons.Default.Architecture
+        FsDomain.SURVEYING_PRINCIPLES_GEODESY -> Icons.Default.Public
+        FsDomain.SURVEYING_PROCESSES_METHODS -> Icons.Default.Construction
     }
 
     Box(
@@ -901,7 +900,9 @@ private fun DomainCard(
                         color = MaterialTheme.calm.ink
                     )
                     Text(
-                        text = "${domain.targetExamQuestions} on exam",
+                        text = domain.description,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                         fontSize = 12.sp,
                         color = MaterialTheme.calm.steel
                     )

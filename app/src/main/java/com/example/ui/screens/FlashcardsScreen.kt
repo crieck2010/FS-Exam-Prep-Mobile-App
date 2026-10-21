@@ -213,14 +213,7 @@ fun FlashcardsScreen(
                     )
                 }
 
-                listOf(
-                    FsDomain.CURVES,
-                    FsDomain.PLSS,
-                    FsDomain.BOUNDARY_LAW_PRINCIPLES,
-                    FsDomain.GEODESY_AND_PROJECTIONS,
-                    FsDomain.SURVEY_METHODS_EQUIPMENT,
-                    FsDomain.APPLIED_MATH_COGO
-                ).forEach { dom ->
+                FsDomain.entries.forEach { dom ->
                     val isDomSelected = (selectedDomain == dom)
                     val domBg = if (isDomSelected) MaterialTheme.calm.accentContainer else MaterialTheme.calm.surface
                     val domBorder = if (isDomSelected) MaterialTheme.calm.accent else MaterialTheme.calm.divider

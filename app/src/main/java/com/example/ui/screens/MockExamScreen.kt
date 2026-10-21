@@ -67,7 +67,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun MockExamScreen(
     questions: List<Question>,
-    timeLimitMinutes: Int = 90,
+    timeLimitMinutes: Int = 320,
     onSubmitExam: (MockExamResult) -> Unit,
     onCancelExam: () -> Unit
 ) {

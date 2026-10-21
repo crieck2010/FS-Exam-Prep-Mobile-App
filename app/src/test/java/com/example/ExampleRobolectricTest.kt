@@ -7,6 +7,7 @@ import com.example.data.QuizRepository
 import com.example.model.FsDomain
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -26,34 +27,56 @@ class ExampleRobolectricTest {
 
     @Test
     fun `verify question bank loaded and domain filtering works`() {
-        assertTrue("Questions must not be empty", QuestionBank.questions.isNotEmpty())
-        val curveQuestions = QuestionBank.getQuestionsForQuiz(
-            domain = FsDomain.CURVES,
-            count = 5,
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        QuestionBank.initialize(context)
+
+        assertNull("QuestionBank loadError must be null", QuestionBank.loadError)
+        assertEquals("Questions count must be 480", 480, QuestionBank.questions.size)
+
+        val compQuestions = QuestionBank.getQuestionsForQuiz(
+            domain = FsDomain.SURVEY_COMPUTATIONS,
+            count = 10,
             focusOnGrowth = false
         )
-        assertTrue(curveQuestions.isNotEmpty())
-        curveQuestions.forEach { q ->
-            assertEquals(FsDomain.CURVES, q.domain)
+        assertTrue(compQuestions.isNotEmpty())
+        compQuestions.forEach { q ->
+            assertEquals(FsDomain.SURVEY_COMPUTATIONS, q.domain)
+            assertTrue(q.id.isNotEmpty())
+            assertTrue(q.questionText.isNotEmpty())
+            assertEquals(4, q.options.size)
+            assertTrue(q.correctIndex in 0..3)
+            assertTrue(q.explanation.isNotEmpty())
         }
     }
 
     @Test
-    fun `verify mock exam generates questions spanning all domains`() {
-        val mockQuestions = QuestionBank.getMockExamQuestions(count = 32)
-        assertEquals(32, mockQuestions.size)
-        val representedDomains = mockQuestions.map { it.domain }.toSet()
-        assertEquals("All 8 domains must be covered in mock exam", 8, representedDomains.size)
+    fun `verify mock exam generates 110 questions spanning all 7 domains proportionally`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        QuestionBank.initialize(context)
+
+        val mockQuestions = QuestionBank.getMockExamQuestions()
+        assertEquals("Default mock exam size must be 110", 110, mockQuestions.size)
+
+        val domainCounts = mockQuestions.groupBy { it.domain }
+        assertEquals("All 7 domains must be covered in mock exam", 7, domainCounts.size)
+
+        // Check proportional distribution
+        // survey-computations is 120/480 = 25% -> 27 or 28 questions
+        assertTrue("survey-computations should have ~28 questions", (domainCounts[FsDomain.SURVEY_COMPUTATIONS]?.size ?: 0) in 25..30)
     }
 
     @Test
     fun `verify adaptive question selection`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        QuestionBank.initialize(context)
+
         val lowMasteryMap = mapOf(
-            FsDomain.GEODESY_AND_PROJECTIONS to 25,
-            FsDomain.APPLIED_MATH_COGO to 30
+            FsDomain.SURVEYING_PRINCIPLES_GEODESY to 25,
+            FsDomain.SURVEY_COMPUTATIONS to 30
         )
         val adaptiveQuestions = QuestionBank.getAdaptiveQuestions(lowMasteryMap, count = 10)
         assertTrue(adaptiveQuestions.isNotEmpty())
+        assertEquals(10, adaptiveQuestions.size)
     }
 
     @Test

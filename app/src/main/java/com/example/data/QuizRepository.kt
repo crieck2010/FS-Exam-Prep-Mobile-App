@@ -51,6 +51,7 @@ class QuizRepository(context: Context) {
     val themeMode: StateFlow<AppThemeMode> = _themeMode.asStateFlow()
 
     init {
+        QuestionBank.initialize(context)
         loadData()
     }
 
@@ -141,8 +142,8 @@ class QuizRepository(context: Context) {
             CompletedModule(
                 id = "mod_seed_2",
                 timestamp = now - (3600 * 1000 * 26),
-                title = "Boundary Law & Principles Drill",
-                domain = FsDomain.BOUNDARY_LAW_PRINCIPLES,
+                title = "Boundary Law & Real Property Drill",
+                domain = FsDomain.BOUNDARY_LAW_REAL_PROPERTY,
                 totalQuestions = 10,
                 correctCount = 9,
                 incorrectCount = 1,
@@ -157,8 +158,8 @@ class QuizRepository(context: Context) {
             CompletedModule(
                 id = "mod_seed_3",
                 timestamp = now - (3600 * 1000 * 52),
-                title = "Survey Methods & Field Equipment",
-                domain = FsDomain.SURVEY_METHODS_EQUIPMENT,
+                title = "Surveying Processes & Methods",
+                domain = FsDomain.SURVEYING_PROCESSES_METHODS,
                 totalQuestions = 10,
                 correctCount = 8,
                 incorrectCount = 2,
@@ -194,15 +195,15 @@ class QuizRepository(context: Context) {
             }
         }
 
-        if (statsMap[FsDomain.BOUNDARY_LAW_PRINCIPLES]?.attempted == 0) {
-            statsMap[FsDomain.BOUNDARY_LAW_PRINCIPLES] = DomainStat(FsDomain.BOUNDARY_LAW_PRINCIPLES, attempted = 12, correct = 11)
-            statsMap[FsDomain.SURVEY_METHODS_EQUIPMENT] = DomainStat(FsDomain.SURVEY_METHODS_EQUIPMENT, attempted = 10, correct = 9)
-            statsMap[FsDomain.GEODESY_AND_PROJECTIONS] = DomainStat(FsDomain.GEODESY_AND_PROJECTIONS, attempted = 8, correct = 4)
-            statsMap[FsDomain.APPLIED_MATH_COGO] = DomainStat(FsDomain.APPLIED_MATH_COGO, attempted = 10, correct = 6)
-            statsMap[FsDomain.PLSS] = DomainStat(FsDomain.PLSS, attempted = 6, correct = 5)
-            statsMap[FsDomain.CURVES] = DomainStat(FsDomain.CURVES, attempted = 6, correct = 4)
-            statsMap[FsDomain.MATH_AND_SCIENCES] = DomainStat(FsDomain.MATH_AND_SCIENCES, attempted = 6, correct = 4)
-            statsMap[FsDomain.PHOTOGRAMMETRY_GIS] = DomainStat(FsDomain.PHOTOGRAMMETRY_GIS, attempted = 4, correct = 3)
+        val firstDomain = FsDomain.entries.firstOrNull()
+        if (firstDomain != null && statsMap[firstDomain]?.attempted == 0) {
+            statsMap[FsDomain.BOUNDARY_LAW_REAL_PROPERTY] = DomainStat(FsDomain.BOUNDARY_LAW_REAL_PROPERTY, attempted = 12, correct = 11)
+            statsMap[FsDomain.SURVEYING_PROCESSES_METHODS] = DomainStat(FsDomain.SURVEYING_PROCESSES_METHODS, attempted = 10, correct = 9)
+            statsMap[FsDomain.SURVEYING_PRINCIPLES_GEODESY] = DomainStat(FsDomain.SURVEYING_PRINCIPLES_GEODESY, attempted = 8, correct = 4)
+            statsMap[FsDomain.SURVEY_COMPUTATIONS] = DomainStat(FsDomain.SURVEY_COMPUTATIONS, attempted = 10, correct = 6)
+            statsMap[FsDomain.BUSINESS_CONCEPTS_ETHICS] = DomainStat(FsDomain.BUSINESS_CONCEPTS_ETHICS, attempted = 6, correct = 5)
+            statsMap[FsDomain.APPLIED_MATH_STATISTICS] = DomainStat(FsDomain.APPLIED_MATH_STATISTICS, attempted = 6, correct = 4)
+            statsMap[FsDomain.MAPPING_PROCESSES_METHODS] = DomainStat(FsDomain.MAPPING_PROCESSES_METHODS, attempted = 4, correct = 3)
         }
 
         _domainStats.value = statsMap
@@ -321,13 +322,13 @@ class QuizRepository(context: Context) {
         )
 
         // 8. Boundary Law Savvy (Mastery >= 80%)
-        val lawStat = stats[FsDomain.BOUNDARY_LAW_PRINCIPLES]
+        val lawStat = stats[FsDomain.BOUNDARY_LAW_REAL_PROPERTY]
         val lawMastered = (lawStat != null && lawStat.attempted >= 5 && lawStat.accuracyPercentage >= 80)
         list.add(
             Achievement(
                 id = "ach_master_law",
                 title = "Boundary Law Savvy",
-                description = "Demonstrate 80%+ mastery in Boundary Law & Principles",
+                description = "Demonstrate 80%+ mastery in Boundary Law & Real Property",
                 category = AchievementCategory.DOMAIN_MASTERY,
                 iconEmoji = "📜",
                 currentProgress = lawStat?.accuracyPercentage?.coerceAtMost(100) ?: 0,
@@ -337,36 +338,35 @@ class QuizRepository(context: Context) {
             )
         )
 
-        // 9. Curve Master
-        val curvStat = stats[FsDomain.CURVES]
-        val curvMastered = (curvStat != null && curvStat.attempted >= 5 && curvStat.accuracyPercentage >= 80)
+        // 9. Survey Computations Master
+        val compStat = stats[FsDomain.SURVEY_COMPUTATIONS]
+        val compMastered = (compStat != null && compStat.attempted >= 5 && compStat.accuracyPercentage >= 80)
         list.add(
             Achievement(
-                id = "ach_master_curves",
-                title = "Curve Master",
-                description = "Demonstrate 80%+ mastery in Horizontal & Vertical Curves",
+                id = "ach_master_comp",
+                title = "Computations Master",
+                description = "Demonstrate 80%+ mastery in Survey Computations",
                 category = AchievementCategory.DOMAIN_MASTERY,
                 iconEmoji = "📐",
-                currentProgress = curvStat?.accuracyPercentage?.coerceAtMost(100) ?: 0,
+                currentProgress = compStat?.accuracyPercentage?.coerceAtMost(100) ?: 0,
                 targetProgress = 80,
-                isUnlocked = curvMastered
+                isUnlocked = compMastered
             )
         )
 
-        // 10. PLSS Navigator
-        val plssStat = stats[FsDomain.PLSS]
-        val plssMastered = (plssStat != null && plssStat.attempted >= 5 && plssStat.accuracyPercentage >= 80)
+        // 10. Applied Math Specialist
+        val mathStat = stats[FsDomain.APPLIED_MATH_STATISTICS]
+        val mathMastered = (mathStat != null && mathStat.attempted >= 5 && mathStat.accuracyPercentage >= 80)
         list.add(
             Achievement(
-                id = "ach_master_plss",
-                title = "PLSS Navigator",
-                description = "Demonstrate 80%+ mastery in the Public Land Survey System",
+                id = "ach_master_math",
+                title = "Math & Stats Specialist",
+                description = "Demonstrate 80%+ mastery in Applied Math & Statistics",
                 category = AchievementCategory.DOMAIN_MASTERY,
-                iconEmoji = "🗺️",
-                currentProgress = plssStat?.accuracyPercentage?.coerceAtMost(100) ?: 0,
+                iconEmoji = "📊",
+                currentProgress = mathStat?.accuracyPercentage?.coerceAtMost(100) ?: 0,
                 targetProgress = 80,
-                isUnlocked = plssMastered,
-                unlockedDate = if (plssMastered) "Unlocked" else null
+                isUnlocked = mathMastered
             )
         )
 

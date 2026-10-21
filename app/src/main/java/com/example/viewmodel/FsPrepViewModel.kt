@@ -120,8 +120,8 @@ class FsPrepViewModel(application: Application) : AndroidViewModel(application) 
         _currentScreen.value = ScreenState.QUIZ
     }
 
-    fun startMockExam(timeLimitMinutes: Int = 90) {
-        val questions = QuestionBank.getMockExamQuestions(count = 32)
+    fun startMockExam(timeLimitMinutes: Int = 320) {
+        val questions = QuestionBank.getMockExamQuestions()
         _mockQuestions.value = questions
         _currentScreen.value = ScreenState.MOCK_EXAM
     }
