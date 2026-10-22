@@ -376,7 +376,7 @@ class QuizRepository(context: Context) {
             Achievement(
                 id = "ach_mock_exam",
                 title = "Simulated Pro",
-                description = "Complete a full timed NCEES FS Mock Exam",
+                description = "Complete a full timed FS Mock Exam",
                 category = AchievementCategory.MOCK_EXAM,
                 iconEmoji = "🎓",
                 currentProgress = if (hasMock) 1 else 0,

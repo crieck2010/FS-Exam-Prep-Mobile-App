@@ -101,6 +101,7 @@ class MainActivity : ComponentActivity() {
                                 domainStats = domainStats,
                                 achievements = achievements,
                                 leaderboard = leaderboard,
+                                userHandle = userHandle,
                                 currentThemeMode = themeMode,
                                 onSelectThemeMode = { newMode -> viewModel.setThemeMode(newMode) },
                                 onStartDomainQuiz = { domain -> viewModel.startDomainQuiz(domain) },

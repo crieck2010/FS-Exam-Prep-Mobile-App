@@ -48,7 +48,7 @@ data class MockExamResult(
     val correctCount: Int,
     val scorePercentage: Int,
     val timeSpentSeconds: Int,
-    val isPassing: Boolean, // typically >= 70% on NCEES FS
+    val isPassing: Boolean, // typically >= 70% (practice benchmark)
     val domainScores: Map<FsDomain, Pair<Int, Int>>, // domain -> (correct, total)
     val userAnswers: Map<String, Int>,
     val flaggedQuestionIds: Set<String>

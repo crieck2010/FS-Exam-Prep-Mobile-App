@@ -1,6 +1,6 @@
 {
   "name": "FS Prep",
-  "description": "NCEES Fundamentals of Surveying (FS) practice questions, domain quizzes, strength & weakness analytics, and detailed problem solutions.",
+  "description": "Fundamentals of Surveying (FS) practice questions, domain quizzes, strength & weakness analytics, and detailed problem solutions.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

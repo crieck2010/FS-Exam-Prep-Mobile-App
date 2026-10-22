@@ -231,7 +231,7 @@ fun MockExamScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "NCEES FS CBT Simulation",
+                        text = "FS Exam Simulation",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.calm.steel

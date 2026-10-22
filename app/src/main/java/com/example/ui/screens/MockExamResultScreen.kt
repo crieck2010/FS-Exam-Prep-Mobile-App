@@ -136,7 +136,7 @@ fun MockExamResultScreen(
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = if (result.isPassing)
-                                "Score: ${result.scorePercentage}% • You exceeded the NCEES cut score threshold."
+                                "Score: ${result.scorePercentage}% • A passing-level performance."
                             else
                                 "Score: ${result.scorePercentage}% • Focus on targeted domain drills to reach the 70% threshold.",
                             style = TabularNumStyle.copy(
@@ -223,7 +223,7 @@ fun MockExamResultScreen(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Performance across all NCEES exam specifications",
+                text = "Performance across all FS exam domains",
                 fontSize = 13.sp,
                 color = MaterialTheme.calm.steel
             )

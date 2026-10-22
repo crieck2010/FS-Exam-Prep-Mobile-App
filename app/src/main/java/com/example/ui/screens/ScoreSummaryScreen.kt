@@ -101,7 +101,7 @@ fun ScoreSummaryScreen(
             // Score headline based on performance
             val headline = when {
                 module.percentage >= 80 -> "Mastery achieved! Outstanding performance across test areas."
-                module.percentage >= 70 -> "Well done! You surpassed the NCEES cut score threshold."
+                module.percentage >= 70 -> "Well done! A passing-level performance."
                 module.percentage >= 50 -> "Good foundation! Focus on the growth areas below."
                 else -> "Great practice run! Target the core areas below to level up."
             }
