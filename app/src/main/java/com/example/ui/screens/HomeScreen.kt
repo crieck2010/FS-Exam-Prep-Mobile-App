@@ -703,12 +703,12 @@ private fun ProgressTabContent(
             val rankText = if (myRankEntry != null) {
                 "Rank #${myRankEntry.rank} • ${myRankEntry.accuracy}% accuracy • ${myRankEntry.questionsAnswered} answered"
             } else {
-                "Compare accuracy and streaks with the community"
+                "Example standings to benchmark your accuracy and streaks"
             }
 
             ActionRow(
                 icon = Icons.Default.Leaderboard,
-                title = "Community Leaderboard",
+                title = "Sample Leaderboard",
                 subtitle = rankText,
                 actionLabel = "View All",
                 onAction = onOpenLeaderboard,
@@ -776,7 +776,7 @@ private fun ProgressTabContent(
                 }
             }
         } else {
-            items(completedModules.take(10)) { module ->
+            items(completedModules) { module ->
                 CompletedModuleRow(module = module, onReview = { onReviewModule(module) })
                 HorizontalDivider(color = MaterialTheme.calm.divider, thickness = 1.dp)
             }
