@@ -31,7 +31,7 @@ class ExampleRobolectricTest {
         QuestionBank.initialize(context)
 
         assertNull("QuestionBank loadError must be null", QuestionBank.loadError)
-        assertEquals("Questions count must be 480", 480, QuestionBank.questions.size)
+        assertEquals("Questions count must be 1143", 1143, QuestionBank.questions.size)
 
         val compQuestions = QuestionBank.getQuestionsForQuiz(
             domain = FsDomain.SURVEY_COMPUTATIONS,
@@ -61,7 +61,7 @@ class ExampleRobolectricTest {
         assertEquals("All 7 domains must be covered in mock exam", 7, domainCounts.size)
 
         // Check proportional distribution
-        // survey-computations is 120/480 = 25% -> 27 or 28 questions
+        // survey-computations is 300/1143 = 26.2% -> 28 or 29 questions
         assertTrue("survey-computations should have ~28 questions", (domainCounts[FsDomain.SURVEY_COMPUTATIONS]?.size ?: 0) in 25..30)
     }
 

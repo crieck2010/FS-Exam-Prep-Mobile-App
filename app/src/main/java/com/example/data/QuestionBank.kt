@@ -14,7 +14,7 @@ import java.io.InputStreamReader
 object QuestionBank {
 
     private const val TAG = "QuestionBank"
-    private const val BANK_ASSET_PATH = "banks/bank-seed-20261021.json"
+    private const val BANK_ASSET_PATH = "banks/bank-seed-20261026.json"
 
     private var _questions: List<Question>? = null
 
